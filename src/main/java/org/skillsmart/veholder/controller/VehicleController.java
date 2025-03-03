@@ -2,8 +2,8 @@ package org.skillsmart.veholder.controller;
 
 import org.skillsmart.veholder.entity.Brand;
 import org.skillsmart.veholder.entity.Vehicle;
-import org.skillsmart.veholder.repository.BrandRepository;
-import org.skillsmart.veholder.repository.VehicleRepository;
+import org.skillsmart.veholder.service.BrandService;
+import org.skillsmart.veholder.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -21,16 +21,16 @@ import java.util.List;
 public class VehicleController {
 
     @Autowired
-    private VehicleRepository vehicleRepository;
+    private VehicleService vehicleService;
     @Autowired
-    private BrandRepository brandRepository;
+    private BrandService brandService;
 
     @GetMapping("/info")
     public String getAllInfo(Model model) {
         Sort sortVehicles = Sort.by("id").ascending();
-        List<Vehicle> vehicles = vehicleRepository.findAll(sortVehicles);
+        List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
         Sort sortBrands = Sort.by("id").ascending();
-        List<Brand> brands = brandRepository.findAll(sortBrands);
+        List<Brand> brands = brandService.getList(sortBrands);
         model.addAttribute("vehicles", vehicles);
         model.addAttribute("brands", brands);
         return "info";
@@ -51,30 +51,30 @@ public class VehicleController {
         Vehicle vehicle = new Vehicle();
         model.addAttribute("vehicle", vehicle);
         Sort sortBrands = Sort.by("name").ascending();
-        List<Brand> brands = brandRepository.findAll(sortBrands);
+        List<Brand> brands = brandService.getList(sortBrands);
         model.addAttribute("brands", brands);
         return "vehicle";
     }
 
     @RequestMapping("/vehicle/edit")
     public String editVehicle(Model model, @RequestParam Long id) {
-        Vehicle vehicle = vehicleRepository.getReferenceById(id);
+        Vehicle vehicle = vehicleService.getVehicleById(id);
         model.addAttribute("vehicle", vehicle);
         Sort sortBrands = Sort.by("name").ascending();
-        List<Brand> brands = brandRepository.findAll(sortBrands);
+        List<Brand> brands = brandService.getList(sortBrands);
         model.addAttribute("brands", brands);
         return "vehicle";
     }
 
     @RequestMapping("vehicle/delete")
     public String delVehicle(Model model, @RequestParam Long id) {
-        vehicleRepository.deleteById(id);
+        vehicleService.delete(id);
         return "redirect:/info";
     }
 
     @RequestMapping(value = "vehicle/save", method = RequestMethod.POST)
     public String saveVehicle(@ModelAttribute("vehicle") Vehicle vehicle) {
-        vehicleRepository.save(vehicle);
+        vehicleService.save(vehicle);
         return "redirect:/info";
     }
 
@@ -87,20 +87,20 @@ public class VehicleController {
 
     @RequestMapping("brand/edit")
     public String editBrand(Model model, @RequestParam Long id) {
-        Brand brand = brandRepository.getReferenceById(id);
+        Brand brand = brandService.getBrandById(id);
         model.addAttribute("brand", brand);
         return "brand";
     }
 
     @RequestMapping("brand/delete")
     public String delBrand(Model model, @RequestParam Long id) {
-        brandRepository.deleteById(id);
+        brandService.delete(id);
         return "redirect:/info";
     }
 
     @RequestMapping(value = "brand/save", method = RequestMethod.POST)
     public String saveBrand(@ModelAttribute("brand") Brand brand) {
-        brandRepository.save(brand);
+        brandService.save(brand);
         return "redirect:/info";
     }
 }

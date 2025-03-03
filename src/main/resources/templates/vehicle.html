@@ -5,39 +5,75 @@
     <title>Vehicle</title>
 </head>
 <body>
-    <h1 th:if="${vehicle == null}">Добавить автомобиль</h1>
-    <h1 th:unless="${vehicle == null}">Изменить запись об автомобиле</h1>
-    <form th:action="vehicle/save" method="post">
+    <h1 th:if="${vehicle?.id == null}">Добавить автомобиль</h1>
+    <h1 th:unless="${vehicle?.id == null}">Изменить запись об автомобиле</h1>
+    <form th:action="@{/vehicle/save}" method="post" modelAttribute="vehicle">
         <table border="0" cellpadding="5">
-            <tr th:if="${vehicle != null}">
-                <td>ID: </td>
-                <td>${vehicle.id}
-                    <form:hidden path="id"/>
+            <tr>
+                <td>
+                    <input th:if="${vehicle?.id != null}" type="hidden" id="id" name="id" th:value="${vehicle?.id}">
                 </td>
             </tr>
             <tr>
                 <td>Бренд:</td>
-                <td><input type="text"/> </td>
+                <td>
+                    <select id="brand" name="brand">
+                        <option th:each="brand : ${brands}"
+                                th:value="${brand.id}"
+                                th:text="${brand.name}"
+                                th:selected="${vehicle?.brand?.id != null && vehicle?.brand?.id == brand.id}">
+                        </option>
+                    </select>
+                </td>
             </tr>
             <tr>
                 <td>Гос номер:</td>
+                <td>
+                    <input type="text" id="registrationNumber" name="registrationNumber" th:value="${vehicle?.registrationNumber}" required autocomplete="off">
+                </td>
             </tr>
             <tr>
                 <td>Год выпуска:</td>
+                <td>
+                    <input type="number" id="yearOfProduction" name="yearOfProduction" th:value="${vehicle?.yearOfProduction}" required autocomplete="off">
+                </td>
             </tr>
             <tr>
                 <td>Стоимость:</td>
+                <td>
+                    <input type="number" id="price" name="price" th:value="${vehicle?.price}" required autocomplete="off">
+                </td>
             </tr>
             <tr>
                 <td>Цвет:</td>
+                <td>
+                    <input type="text" id="color" name="color" th:value="${vehicle?.color}" required autocomplete="off">
+                </td>
             </tr>
             <tr>
                 <td>Пробег:</td>
+                <td>
+                    <input type="number" id="mileage" name="mileage" th:value="${vehicle?.mileage}" required autocomplete="off">
+                </td>
             </tr>
             <tr>
                 <td>На ходу:</td>
+                <td>
+                    <select id="inOrder" name="inOrder">
+                        <option th:value="true"
+                                th:text="да"
+                                th:selected="${vehicle?.inOrder}">
+                        </option>
+                        <option th:value="false"
+                                th:text="нет"
+                                th:selected="${!vehicle?.inOrder}">
+                        </option>
+                    </select>
+                </td>
             </tr>
         </table>
+        <button type="submit">Сохранить</button>
+        <button th:formaction="@{/info}" type="submit" formmethod="get" formnovalidate>Отменить</button>
     </form>
 </body>
 </html>

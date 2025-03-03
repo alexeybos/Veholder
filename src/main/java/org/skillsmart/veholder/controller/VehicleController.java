@@ -50,19 +50,31 @@ public class VehicleController {
     public String addVehicle(Model model) {
         Vehicle vehicle = new Vehicle();
         model.addAttribute("vehicle", vehicle);
+        Sort sortBrands = Sort.by("name").ascending();
+        List<Brand> brands = brandRepository.findAll(sortBrands);
+        model.addAttribute("brands", brands);
         return "vehicle";
     }
 
-    @PostMapping("/vehicle/edit")
+    @RequestMapping("/vehicle/edit")
     public String editVehicle(Model model, @RequestParam Long id) {
         Vehicle vehicle = vehicleRepository.getReferenceById(id);
         model.addAttribute("vehicle", vehicle);
+        Sort sortBrands = Sort.by("name").ascending();
+        List<Brand> brands = brandRepository.findAll(sortBrands);
+        model.addAttribute("brands", brands);
         return "vehicle";
     }
 
-    @PostMapping("vehicle/delete")
+    @RequestMapping("vehicle/delete")
     public String delVehicle(Model model, @RequestParam Long id) {
         vehicleRepository.deleteById(id);
+        return "redirect:/info";
+    }
+
+    @RequestMapping(value = "vehicle/save", method = RequestMethod.POST)
+    public String saveVehicle(@ModelAttribute("vehicle") Vehicle vehicle) {
+        vehicleRepository.save(vehicle);
         return "redirect:/info";
     }
 
@@ -73,14 +85,14 @@ public class VehicleController {
         return "brand";
     }
 
-    @PostMapping("brand/edit")
+    @RequestMapping("brand/edit")
     public String editBrand(Model model, @RequestParam Long id) {
         Brand brand = brandRepository.getReferenceById(id);
         model.addAttribute("brand", brand);
         return "brand";
     }
 
-    @PostMapping("brand/delete")
+    @RequestMapping("brand/delete")
     public String delBrand(Model model, @RequestParam Long id) {
         brandRepository.deleteById(id);
         return "redirect:/info";
@@ -91,10 +103,4 @@ public class VehicleController {
         brandRepository.save(brand);
         return "redirect:/info";
     }
-
-    //@RequestMapping(value = "/save", method = RequestMethod.POST)
-    //public String saveCustomer(@ModelAttribute("customer") Customer customer) {
-    //    customerService.save(customer);
-    //    return "redirect:/";
-    //}
 }

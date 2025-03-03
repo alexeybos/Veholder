@@ -5,33 +5,54 @@
     <title>Brand</title>
 </head>
 <body>
-    <h1 th:text="${brand}"></h1>
     <h1 th:if="${brand?.id == null}">Добавить бренд</h1>
     <h1 th:unless="${brand?.id == null}">Изменить бренд</h1>
     <form th:action="@{/brand/save}" method="post" modelAttribute="brand">
-        <input th:if="${brand?.id != null}" type="hidden" id="id" name="id" th:value="${brand?.id}">
-        <label for="name">Наименование:</label>
-        <input type="text" id="name" name="name" th:value="${brand?.name}" required autocomplete="off">
-        <br>
-        <label for="type">Тип:</label>
-        <input th:if="${brand != null}" list="types" id="type1" name="type" th:value="${brand?.type}" autocomplete="off">
-        <input th:unless="${brand != null}" list="types" id="type" name="type" autocomplete="off">
-        <datalist id="types">
-            <option value="легковая"></option>
-            <option value="грузовая"></option>
-            <option value="автобус"></option>
-        </datalist>
-        <br>
-        <label for="numberOfSeats">Кол-во мест:</label>
-        <input type="number" id="numberOfSeats" name="numberOfSeats" th:value="${brand?.numberOfSeats}">
-        <br>
-        <label for="loadCapacity">Грузоподъемность:</label>
-        <input type="number" id="loadCapacity" name="loadCapacity" th:value="${brand?.loadCapacity}">
-        <br>
-        <label for="tank">Объем бака:</label>
-        <input type="number" id="tank" name="tank" th:value="${brand?.tank}">
-        <br>
+        <table>
+            <tr>
+                <td>
+                    <input th:if="${brand?.id != null}" type="hidden" id="id" name="id" th:value="${brand?.id}">
+                </td>
+            </tr>
+            <tr>
+                <td>Наименование:</td>
+                <td>
+                    <input type="text" id="name" name="name" th:value="${brand?.name}" required autocomplete="off">
+                </td>
+            </tr>
+            <tr>
+                <td>Тип:</td>
+                <td>
+                    <input th:if="${brand != null}" list="types" id="type1" name="type" th:value="${brand?.type}" autocomplete="off">
+                    <input th:unless="${brand != null}" list="types" id="type" name="type" autocomplete="off">
+                    <datalist id="types">
+                        <option value="легковая"></option>
+                        <option value="грузовая"></option>
+                        <option value="автобус"></option>
+                    </datalist>
+                </td>
+            </tr>
+            <tr>
+                <td>Кол-во мест:</td>
+                <td>
+                    <input type="number" id="numberOfSeats" name="numberOfSeats" th:value="${brand?.numberOfSeats}">
+                </td>
+            </tr>
+            <tr>
+                <td>Грузоподъемность:</td>
+                <td>
+                    <input type="number" id="loadCapacity" name="loadCapacity" th:value="${brand?.loadCapacity}">
+                </td>
+            </tr>
+            <tr>
+                <td>Объем бака:</td>
+                <td>
+                    <input type="number" id="tank" name="tank" th:value="${brand?.tank}">
+                </td>
+            </tr>
+        </table>
         <button type="submit">Сохранить</button>
+        <button th:formaction="@{/info}" type="submit" formmethod="get" formnovalidate>Отменить</button>
     </form>
 </body>
 </html>

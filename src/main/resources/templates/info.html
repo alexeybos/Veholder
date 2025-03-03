@@ -8,8 +8,7 @@
     <h1>Автомобили в базе</h1>
         <form th:action="@{/info/vehicles}" method="post">
             <button type="submit">Обновить</button>
-            <button type="button" disabled>Добавить</button>
-            <button type="button" disabled>Удалить</button>
+            <button th:formaction="@{/vehicle/add}" type="submit">Добавить</button>
         </form>
         <table border="1">
             <thead>
@@ -22,6 +21,7 @@
                 <th>Цвет</th>
                 <th>Пробег</th>
                 <th>На ходу</th>
+                <th>Действие</th>
             </tr>
             </thead>
             <tbody>
@@ -36,6 +36,12 @@
                 <td th:text="${vehicle.mileage}"></td>
                 <td th:if="${vehicle.inOrder}" bgcolor="#00FF00" th:text="да"></td>
                 <td th:unless="${vehicle.inOrder}" bgcolor="#FF0000" th:text="нет"></td>
+                <td>
+                    <form th:action="@{/vehicle/edit}" method="post">
+                        <button th:formaction="@{/vehicle/edit?id={id}(id=${vehicle.id})}" type="submit">Изменить</button>
+                        <button th:formaction="@{/vehicle/delete?id={id}(id=${vehicle.id})}" type="submit">Удалить</button>
+                    </form>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -66,8 +72,8 @@
             <td th:text="${brand.tank}"></td>
             <td>
                 <form th:action="@{/brand/edit}" method="post">
-                    <button th:formaction="@{/brand/edit?id=${brand.id}}" type="submit">Изменить</button>
-                    <button type="button" disabled>Удалить</button>
+                    <button th:formaction="@{/brand/edit?id={id}(id=${brand.id})}" type="submit">Изменить</button>
+                    <button th:formaction="@{/brand/delete?id={id}(id=${brand.id})}" type="submit">Удалить</button>
                 </form>
             </td>
         </tr>

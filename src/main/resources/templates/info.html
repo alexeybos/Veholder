@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Список автомобилей в базе</title>
+</head>
+<body>
+    <h1>Автомобили в базе</h1>
+        <form th:action="@{/info/vehicles}" method="post">
+            <button type="submit">Обновить</button>
+            <button type="button" disabled>Добавить</button>
+            <button type="button" disabled>Удалить</button>
+        </form>
+        <table border="1">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Бренд</th>
+                <th>Гос номер</th>
+                <th>Год выпуска</th>
+                <th>Стоимость</th>
+                <th>Цвет</th>
+                <th>Пробег</th>
+                <th>На ходу</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="vehicle : ${vehicles}">
+                <td th:text="${vehicle.id}"></td>
+                <td th:if="${vehicle.brand == null}" th:text="пусто"></td>
+                <td th:unless="${vehicle.brand == null}" th:text="${vehicle.brand.name}"></td>
+                <td th:text="${vehicle.registrationNumber}"></td>
+                <td th:text="${vehicle.yearOfProduction}"></td>
+                <td th:text="${vehicle.price}"></td>
+                <td th:text="${vehicle.color}"></td>
+                <td th:text="${vehicle.mileage}"></td>
+                <td th:if="${vehicle.inOrder}" bgcolor="#00FF00" th:text="да"></td>
+                <td th:unless="${vehicle.inOrder}" bgcolor="#FF0000" th:text="нет"></td>
+            </tr>
+            </tbody>
+        </table>
+    <h1>Доступные бренды</h1>
+    <form th:action="@{/info/brands}" method="post">
+        <button type="submit">Обновить</button>
+        <button th:formaction="@{/brand/add}" type="submit">Добавить</button>
+    </form>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Наименование</th>
+            <th>Тип</th>
+            <th>Кол-во мест</th>
+            <th>Грузоподъемность</th>
+            <th>Объем бака</th>
+            <th>Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="brand : ${brands}">
+            <td th:text="${brand.id}"></td>
+            <td th:text="${brand.name}"></td>
+            <td th:text="${brand.type}"></td>
+            <td th:text="${brand.numberOfSeats}"></td>
+            <td th:text="${brand.loadCapacity}"></td>
+            <td th:text="${brand.tank}"></td>
+            <td>
+                <form th:action="@{/brand/edit}" method="post">
+                    <button th:formaction="@{/brand/edit?id=${brand.id}}" type="submit">Изменить</button>
+                    <button type="button" disabled>Удалить</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</body>
+</html>

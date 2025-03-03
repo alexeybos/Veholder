@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:form="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle</title>
+</head>
+<body>
+    <h1 th:if="${vehicle == null}">Добавить автомобиль</h1>
+    <h1 th:unless="${vehicle == null}">Изменить запись об автомобиле</h1>
+    <form th:action="vehicle/save" method="post">
+        <table border="0" cellpadding="5">
+            <tr th:if="${vehicle != null}">
+                <td>ID: </td>
+                <td>${vehicle.id}
+                    <form:hidden path="id"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Бренд:</td>
+                <td><input type="text"/> </td>
+            </tr>
+            <tr>
+                <td>Гос номер:</td>
+            </tr>
+            <tr>
+                <td>Год выпуска:</td>
+            </tr>
+            <tr>
+                <td>Стоимость:</td>
+            </tr>
+            <tr>
+                <td>Цвет:</td>
+            </tr>
+            <tr>
+                <td>Пробег:</td>
+            </tr>
+            <tr>
+                <td>На ходу:</td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>

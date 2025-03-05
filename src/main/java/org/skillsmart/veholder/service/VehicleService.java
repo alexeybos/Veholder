@@ -1,6 +1,7 @@
 package org.skillsmart.veholder.service;
 
 import org.skillsmart.veholder.entity.Vehicle;
+import org.skillsmart.veholder.entity.VehicleProjection;
 import org.skillsmart.veholder.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -26,6 +27,16 @@ public class VehicleService {
 
     public List<Vehicle> getList(Sort sortBy) {
         return repo.findAll(sortBy);
+
+    }
+
+    public List<VehicleProjection> getOnlyVehiclesList(Sort sortBy) {
+        return repo.findAllProjectedBy(sortBy);
+
+    }
+
+    public VehicleProjection getVehicleProjectedById(Long id) {
+        return repo.getReferenceProjectedById(id);
     }
 
     public Vehicle getVehicleById(Long id) {

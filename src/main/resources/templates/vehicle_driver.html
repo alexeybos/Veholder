@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VehicleDriver</title>
+</head>
+<body>
+<h1 th:if="${vehicle_driver?.id == null}">Добавить водителя</h1>
+<h1 th:unless="${vehicle_driver?.id == null}">Изменить водителя</h1>
+<form th:action="@{/vehicle_driver/save}" method="post" modelAttribute="vehicleDriver">
+    <table>
+        <tr>
+            <td>
+                <input th:if="${vehicle_driver?.id != null}" type="hidden" id="id" name="id" th:value="${vehicle_driver?.id}">
+            </td>
+        </tr>
+        <tr>
+            <td>Автомобиль:</td>
+            <td>
+                <select id="vehicle" name="vehicle">
+                    <option th:each="vehicle : ${vehicles}"
+                            th:value="${vehicle.id}"
+                            th:text="${vehicle.registrationNumber} + '  ' + ${vehicle.brand.name} + ' ' + ${vehicle.enterprise.name}"
+                            th:selected="${vehicle_driver?.vehicle?.id != null && vehicle_driver?.vehicle?.id == vehicle.id}">
+                    </option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Имя водителя:</td>
+            <td>
+                <select id="driver" name="driver">
+                    <option th:each="driver : ${drivers}"
+                            th:value="${driver.id}"
+                            th:text="${driver.name}"
+                            th:selected="${vehicle_driver?.driver?.id != null && vehicle_driver?.driver?.id == driver.id}">
+                    </option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Активный водитель:</td>
+            <td>
+                <select id="active" name="active">
+                    <option th:value="true"
+                            th:text="да"
+                            th:selected="${vehicle_driver?.active}">
+                    </option>
+                    <option th:value="false"
+                            th:text="нет"
+                            th:selected="${!vehicle_driver?.active}">
+                    </option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <button type="submit">Сохранить</button>
+    <button th:formaction="@{/info}" type="submit" formmethod="get" formnovalidate>Отменить</button>
+</form>
+</body>
+</html>

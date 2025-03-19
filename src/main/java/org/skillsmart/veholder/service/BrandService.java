@@ -28,7 +28,6 @@ public class BrandService {
     }
 
     public Brand getBrandById(Long id) {
-        //repo.getReferenceById();
         return repo.getReferenceById(id);
     }
 }

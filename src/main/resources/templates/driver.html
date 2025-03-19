@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver</title>
+</head>
+<body>
+<h1 th:if="${driver?.id == null}">Добавить водителя</h1>
+<h1 th:unless="${driver?.id == null}">Изменить водителя</h1>
+<form th:action="@{/driver/save}" method="post" modelAttribute="driver">
+    <table>
+        <tr>
+            <td>
+                <input th:if="${driver?.id != null}" type="hidden" id="id" name="id" th:value="${driver?.id}">
+            </td>
+        </tr>
+        <tr>
+            <td>Имя:</td>
+            <td>
+                <input type="text" id="name" name="name" th:value="${driver?.name}" required autocomplete="off">
+            </td>
+        </tr>
+        <tr>
+            <td>Год рождения:</td>
+            <td>
+                <input type="date" id="birthDate" name="birthDate" th:value="${driver?.birthDate}">
+            </td>
+        </tr>
+        <tr>
+            <td>Зарплата:</td>
+            <td>
+                <input type="text" id="salary" name="salary" th:value="${driver?.salary}">
+            </td>
+        </tr>
+        <tr>
+            <td>Предприятие:</td>
+            <td>
+                <select id="enterprise" name="enterprise">
+                    <option th:each="enterprise : ${enterprises}"
+                            th:value="${enterprise.id}"
+                            th:text="${enterprise.name}"
+                            th:selected="${driver?.enterprise?.id != null && driver?.enterprise?.id == enterprise.id}">
+                    </option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <button type="submit">Сохранить</button>
+    <button th:formaction="@{/info}" type="submit" formmethod="get" formnovalidate>Отменить</button>
+</form>
+</body>
+</html>

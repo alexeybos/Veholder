@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise</title>
+</head>
+<body>
+    <h1 th:if="${enterprise?.id == null}">Добавить предприятие</h1>
+    <h1 th:unless="${enterprise?.id == null}">Изменить предприятие</h1>
+    <form th:action="@{/enterprise/save}" method="post" modelAttribute="enterprise">
+        <table>
+            <tr>
+                <td>
+                    <input th:if="${enterprise?.id != null}" type="hidden" id="id" name="id" th:value="${enterprise?.id}">
+                </td>
+            </tr>
+            <tr>
+                <td>Наименование:</td>
+                <td>
+                    <input type="text" id="name" name="name" th:value="${enterprise?.name}" required autocomplete="off">
+                </td>
+            </tr>
+            <tr>
+                <td>Город:</td>
+                <td>
+                    <input type="text" id="city" name="city" th:value="${enterprise?.city}">
+                </td>
+            </tr>
+            <tr>
+                <td>Имя директора:</td>
+                <td>
+                    <input type="text" id="directorName" name="directorName" th:value="${enterprise?.directorName}">
+                </td>
+            </tr>
+        </table>
+        <button type="submit">Сохранить</button>
+        <button th:formaction="@{/info}" type="submit" formmethod="get" formnovalidate>Отменить</button>
+    </form>
+</body>
+</html>

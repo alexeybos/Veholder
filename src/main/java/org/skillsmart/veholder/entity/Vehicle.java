@@ -25,11 +25,14 @@ public class Vehicle {
     private String registrationNumber;
     private boolean inOrder;
 
-    //@ManyToOne(fetch = FetchType.LAZY)
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
     //@JsonIgnore
     private Brand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enterprise_id")
+    private Enterprise enterprise;
 
     public Long getId() {
         return id;
@@ -95,6 +98,14 @@ public class Vehicle {
         this.brand = brand;
     }
 
+    public Enterprise getEnterprise() {
+        return enterprise;
+    }
+
+    public void setEnterprise(Enterprise enterprise) {
+        this.enterprise = enterprise;
+    }
+
     @Override
     public String toString() {
         return "Vehicle{" +
@@ -106,6 +117,7 @@ public class Vehicle {
                 ", registrationNumber='" + registrationNumber + '\'' +
                 ", inOrder=" + inOrder +
                 ", brand=" + brand +
+                ", enterprise=" + enterprise +
                 '}';
     }
 }

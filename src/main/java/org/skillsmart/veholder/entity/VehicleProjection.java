@@ -9,4 +9,5 @@ public interface VehicleProjection {
     int getMileage();
     String getRegistrationNumber();
     boolean isInOrder();
+    Long getEnterpriseId();
 }

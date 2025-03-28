@@ -4,14 +4,11 @@ import org.skillsmart.veholder.entity.Brand;
 import org.skillsmart.veholder.entity.Driver;
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
-import org.skillsmart.veholder.entity.VehicleDriver;
 import org.skillsmart.veholder.service.BrandService;
 import org.skillsmart.veholder.service.DriverService;
 import org.skillsmart.veholder.service.EnterpriseService;
-import org.skillsmart.veholder.service.VehicleDriverService;
 import org.skillsmart.veholder.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,8 +32,11 @@ public class VehicleController {
     private EnterpriseService enterpriseService;
     @Autowired
     private DriverService driverService;
-    @Autowired
-    private VehicleDriverService vehicleDriverService;
+
+    @GetMapping("")
+    public String helloPage(Model model) {
+        return "hello";
+    }
 
     @GetMapping("/info")
     public String getAllInfo(Model model) {
@@ -48,13 +48,11 @@ public class VehicleController {
         List<Enterprise> enterprises = enterpriseService.getEnterprises();
         Sort sortDrivers = Sort.by("id").ascending();
         List<Driver> drivers = driverService.getDrivers(sortDrivers);
-        List<VehicleDriver> relations = vehicleDriverService.getFullVehicleDriverRelations();
 
         model.addAttribute("vehicles", vehicles);
         model.addAttribute("brands", brands);
         model.addAttribute("enterprises", enterprises);
         model.addAttribute("drivers", drivers);
-        model.addAttribute("vehicle_drivers", relations);
         return "info";
     }
 
@@ -170,8 +168,11 @@ public class VehicleController {
     public String addDriver(Model model) {
         Driver driver = new Driver();
         List<Enterprise> enterprises = enterpriseService.getEnterprises();
+        Sort sortVehicles = Sort.by("id").ascending();
+        List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
         model.addAttribute("driver", driver);
         model.addAttribute("enterprises", enterprises);
+        model.addAttribute("vehicles", vehicles);
         return "driver";
     }
 
@@ -179,8 +180,12 @@ public class VehicleController {
     public String editDriver(Model model, @RequestParam Long id) {
         Driver driver = driverService.getDriverById(id);
         List<Enterprise> enterprises = enterpriseService.getEnterprises();
+        Sort sortVehicles = Sort.by("id").ascending();
+        List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
+        vehicles.addFirst(new Vehicle());
         model.addAttribute("driver", driver);
         model.addAttribute("enterprises", enterprises);
+        model.addAttribute("vehicles", vehicles);
         return "driver";
     }
 
@@ -196,40 +201,7 @@ public class VehicleController {
         return "redirect:/info";
     }
 
-    @PostMapping("vehicle_driver/add")
-    public String addVehicleDriverRelation(Model model) {
-        Sort sortVehicles = Sort.by("id").ascending();
-        List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
-        Sort sortDrivers = Sort.by("id").ascending();
-        List<Driver> drivers = driverService.getDrivers(sortDrivers);
-        VehicleDriver relation = new VehicleDriver();
-        model.addAttribute("vehicle_driver", relation);
-        model.addAttribute("vehicles", vehicles);
-        model.addAttribute("drivers", drivers);
-        return "vehicle_driver";
-    }
-
-    @RequestMapping("vehicle_driver/edit")
-    public String editVehicleDriverRelation(Model model, @RequestParam Long id) {
-        Sort sortVehicles = Sort.by("id").ascending();
-        List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
-        Sort sortDrivers = Sort.by("id").ascending();
-        List<Driver> drivers = driverService.getDrivers(sortDrivers);
-
-        VehicleDriver relation = vehicleDriverService.getRelationById(id);
-        model.addAttribute("vehicle_driver", relation);
-        model.addAttribute("vehicles", vehicles);
-        model.addAttribute("drivers", drivers);
-        return "vehicle_driver";
-    }
-
-    @RequestMapping("vehicle_driver/delete")
-    public String delVehicleDriverRelation(Model model, @RequestParam Long id) {
-        vehicleDriverService.delete(id);
-        return "redirect:/info";
-    }
-
-    @RequestMapping(value = "vehicle_driver/save", method = RequestMethod.POST)
+    /*@RequestMapping(value = "vehicle_driver/save", method = RequestMethod.POST)
     public String saveVehicleDriverRelation(@ModelAttribute("vehicle_driver") VehicleDriver relation, Model model) {
         if (relation.getDriver().getEnterprise().getId() != relation.getVehicle().getEnterprise().getId()) {
             model.addAttribute("errorMessage", "Водитель и автомобиль должны принадлежать одному предприятию.");
@@ -243,5 +215,5 @@ public class VehicleController {
         }
 
         return "redirect:/info";
-    }
+    }*/
 }

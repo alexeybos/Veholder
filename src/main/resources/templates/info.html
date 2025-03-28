@@ -123,6 +123,8 @@
             <th>Дата рождения</th>
             <th>Зарплата</th>
             <th>Предприятие</th>
+            <th>Автомобиль</th>
+            <th>Активный водитель:</th>
             <th>Действия</th>
         </tr>
         </thead>
@@ -133,45 +135,14 @@
             <td th:text="${driver.birthDate}"></td>
             <td th:text="${driver.salary}"></td>
             <td th:text="${driver.enterprise.name}"></td>
+            <td th:if="${driver.vehicle == null}">не назначен</td>
+            <td th:unless="${driver.vehicle == null}" th:text="${driver.vehicle?.registrationNumber} + '  ' + ${driver.vehicle?.brand?.name} + ' ' + ${driver.vehicle?.enterprise?.name}"></td>
+            <td th:if="${driver.isActive}" bgcolor="#00FF00" th:text="да"></td>
+            <td th:unless="${driver.isActive}" th:text="нет"></td>
             <td>
                 <form th:action="@{/driver/edit}" method="post">
                     <button th:formaction="@{/driver/edit?id={id}(id=${driver.id})}" type="submit">Изменить</button>
                     <button th:formaction="@{/driver/delete?id={id}(id=${driver.id})}" type="submit">Удалить</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <h1>Назначенные водители</h1>
-    <form th:action="@{/info/vehicle_driver}" method="post">
-        <button th:formaction="@{/vehicle_driver/add}" type="submit">Назначить водителя</button>
-    </form>
-    <table border="1">
-        <thead>
-        <tr>
-            <!--th>ID</th-->
-            <th>ID автомобиля</th>
-            <th>Марка автомобиля</th>
-            <th>Гос. номер</th>
-            <th>Имя водителя</th>
-            <th>Активный водитель</th>
-            <th>Действие</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!tr th:each="vehicledriver : ${vehicle_drivers}">
-            <td th:text="${vehicledriver.vehicle.id}"></td>
-            <td th:if="${vehicledriver.vehicle.brand == null}" th:text="пусто"></td>
-            <td th:unless="${vehicledriver.vehicle.brand == null}" th:text="${vehicledriver.vehicle.brand.name}"></td>
-            <td th:text="${vehicledriver.vehicle.registrationNumber}"></td>
-            <td th:text="${vehicledriver.driver.name}"></td>
-            <td th:if="${vehicledriver.active}" bgcolor="#00FF00" th:text="да"></td>
-            <td th:unless="${vehicledriver.active}" th:text="нет"></td>
-            <td>
-                <form th:action="@{/vehicledriver/edit}" method="post">
-                    <button th:formaction="@{/vehicle_driver/edit?id={id}(id=${vehicledriver.id})}" type="submit">Изменить</button>
-                    <button th:formaction="@{/vehicle_driver/delete?id={id}(id=${vehicledriver.id})}" type="submit">Удалить</button>
                 </form>
             </td>
         </tr>

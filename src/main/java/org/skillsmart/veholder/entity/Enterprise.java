@@ -1,13 +1,36 @@
 package org.skillsmart.veholder.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.*;
+import org.skillsmart.veholder.entity.dto.EnterprisesDriversDto;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "enterprises")
+//@SqlResultSetMapping(
+//    name = "UserPostMapping",
+//    classes = @ConstructorResult(
+//        targetClass = UserPostDto.class,
+//        columns = {
+//            @ColumnResult(name = "user_id", type = Long.class),
+//            @ColumnResult(name = "username", type = String.class),
+//            @ColumnResult(name = "post_id", type = Long.class),
+//            @ColumnResult(name = "post_title", type = String.class)
+//        }
+//    )
+//)
+@SqlResultSetMapping(
+        name = "EnterpriseDriversMapping",
+        classes = @ConstructorResult(
+                targetClass = EnterprisesDriversDto.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "drivers", type = String.class)
+                }
+        )
+)
 public class Enterprise {
 
     @Id

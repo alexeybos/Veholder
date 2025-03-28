@@ -1,15 +1,6 @@
 package org.skillsmart.veholder.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 
 
 import java.time.LocalDate;
@@ -30,6 +21,13 @@ public class Driver {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enterprise_id")
     private Enterprise enterprise;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id")
+    private Vehicle vehicle;
+
+    @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean isActive;
 
     public Long getId() {
         return id;
@@ -71,6 +69,22 @@ public class Driver {
         this.enterprise = enterprise;
     }
 
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
     @Override
     public String toString() {
         return "Driver{" +
@@ -79,6 +93,8 @@ public class Driver {
                 ", birthDate=" + birthDate +
                 ", salary=" + salary +
                 ", enterprise=" + enterprise +
+                ", vehicle=" + vehicle +
+                ", isActive=" + isActive +
                 '}';
     }
 }

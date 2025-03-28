@@ -44,6 +44,33 @@
                 </select>
             </td>
         </tr>
+        <tr>
+            <td>Рабочий автомобиль:</td>
+            <td>
+                <select id="vehicle" name="vehicle">
+                    <option th:each="vehicle : ${vehicles}"
+                            th:value="${vehicle.id}"
+                            th:text="${vehicle.registrationNumber} + '  ' + ${vehicle.brand?.name} + ' ' + ${vehicle.enterprise?.name}"
+                            th:selected="${driver?.vehicle?.id != null && driver?.vehicle?.id == vehicle.id}">
+                    </option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Активный водитель:</td>
+            <td>
+                <select id="active" name="active">
+                    <option th:value="true"
+                            th:text="да"
+                            th:selected="${driver.active}">
+                    </option>
+                    <option th:value="false"
+                            th:text="нет"
+                            th:selected="${!driver.active}">
+                    </option>
+                </select>
+            </td>
+        </tr>
     </table>
     <button type="submit">Сохранить</button>
     <button th:formaction="@{/info}" type="submit" formmethod="get" formnovalidate>Отменить</button>

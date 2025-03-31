@@ -34,7 +34,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
         if (user == null) throw new UsernameNotFoundException("User " + username + " not found");
-        return null;
+        return user;
     }
 
     public User findUserById(Long userId) {
@@ -54,7 +54,7 @@ public class UserService implements UserDetailsService {
         }
 
         user.setRoles(Collections.singleton(new Role(1L, "ROLE_USER")));
-        //user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword("{noop}" + user.getPassword());
         userRepository.save(user);
         return true;
     }

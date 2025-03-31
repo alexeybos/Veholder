@@ -19,15 +19,6 @@ public class Manager extends User {
 
     private String fullName;
 
-    /*@OneToOne
-    @JoinColumn(name = "username")
-    private User user;*/
-    /*@Column(name = "username", updatable = false, unique = true)
-    @Override
-    public String getUsername() {
-        return super.getUsername();
-    }*/
-
     protected Manager() {
     }
 

@@ -19,6 +19,9 @@ public class Manager extends User {
 
     private String fullName;
 
+    @ManyToMany(mappedBy = "managers")
+    private Set<Enterprise> enterprises;
+
     protected Manager() {
     }
 

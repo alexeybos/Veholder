@@ -8,6 +8,8 @@ import org.skillsmart.veholder.entity.dto.EnterprisesDriversDto;
 import org.skillsmart.veholder.repository.EnterpriseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,12 @@ public class EnterpriseService {
     public List<Enterprise> getEnterprises() {
         Sort sort = Sort.by("id").ascending();
         return repo.findAll(sort);
+    }
+
+    public List<Enterprise> getEnterprisesByManager() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return repo.getEnterprisesByManager(username);
     }
 
     public Enterprise getEnterpriseById(Long id) {

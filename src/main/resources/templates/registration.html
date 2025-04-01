@@ -5,14 +5,13 @@
 </head>
 <body>
 <div>
-    <form method="POST" modelAttribute="userForm">
+    <form th:action="@{/registration}" method="post" modelAttribute="userForm">
         <h2>Регистрация</h2>
         <div>
-            <input type="text" path="username" placeholder="Username"
-                        autofocus="true">
+            <input type="text" id="username" name="username" required autocomplete="off" autofocus="true">
         </div>
         <div>
-            <input type="password" path="password" placeholder="Password">
+            <input type="password" id="password" name="Password">
         </div>
         <button type="submit">Зарегистрироваться</button>
     </form>

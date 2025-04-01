@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import org.skillsmart.veholder.entity.dto.EnterprisesDriversDto;
 
+import java.util.Set;
+
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "enterprises")
@@ -40,6 +42,9 @@ public class Enterprise {
     private String name;
     private String city;
     private String directorName;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Manager> managers;
 
     public Long getId() {
         return id;

@@ -1,22 +1,17 @@
 package org.skillsmart.veholder.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.dto.ManagerDTO;
-import org.skillsmart.veholder.service.EnterpriseService;
 import org.skillsmart.veholder.service.ManagerDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/admin/managers")
+@RequestMapping(value = "")
 public class ManagerRestController {
 
     @Autowired
@@ -27,8 +22,14 @@ public class ManagerRestController {
         return new ResponseEntity<>(service.getEnterprises(), HttpStatus.OK);
     }*/
 
-    @GetMapping(value = "")
-    public ResponseEntity<List<ManagerDTO>> getEnterprises() {
+    @GetMapping(value = "api/admin/managers")
+    public ResponseEntity<List<ManagerDTO>> getManagers() {
+        return new ResponseEntity<>(service.getManagersList(), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "post/managers")
+    public ResponseEntity<List<ManagerDTO>> getEnterpriseById() {
+        //JsonNode enterprise = service.getFullEnterpriseInfoById(id);
         return new ResponseEntity<>(service.getManagersList(), HttpStatus.OK);
     }
 

@@ -2,6 +2,7 @@ package org.skillsmart.veholder.config;
 
 
 import org.skillsmart.veholder.repository.UserRepository;
+import org.skillsmart.veholder.security.JwtAuthenticationFilter;
 import org.skillsmart.veholder.security.JwtTokenUtil;
 import org.skillsmart.veholder.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
@@ -96,13 +98,11 @@ public class WebSecurityConfig {
                         // Доступ только для не зарегистрированных пользователей
                         .requestMatchers("/registration").not().fullyAuthenticated()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/login").permitAll()
                         //.requestMatchers("/api/**").authenticated()
                         // Все остальные страницы требуют аутентификации
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore()
                 .formLogin(form -> form
                         .loginPage("/login")
                         // Перенаправление на главную страницу после успешного входа
@@ -110,19 +110,22 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .permitAll()
-                        .logoutSuccessUrl("/")
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID", "token")
                 )
-                .exceptionHandling(exceptions -> exceptions
-                        .defaultAuthenticationEntryPointFor(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                                request -> request.getRequestURI().startsWith("/api")
-                        ));
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtTokenUtil, userDetailsService(userRepository));
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {

@@ -27,14 +27,23 @@ public class VehicleRestController {
         return new ResponseEntity<>(service.getList(sortBy), HttpStatus.OK);
     }
 
-    @GetMapping(value = "")
+    /*@GetMapping(value = "")
     public ResponseEntity<List<VehicleProjection>> getVehiclesLazy() {
         Sort sortBy = Sort.by("id").ascending();
         return new ResponseEntity<>(service.getOnlyVehiclesList(sortBy), HttpStatus.OK);
+    }*/
+
+    @GetMapping(value = "")
+    public ResponseEntity<List<VehicleProjection>> getVehiclesLazy() {
+        Sort sortBy = Sort.by("id").ascending();
+        return new ResponseEntity<>(service.getOnlyVehiclesListForManager(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<VehicleProjection> getVehicle(@PathVariable Long id) {
         return new ResponseEntity<>(service.getVehicleProjectedById(id), HttpStatus.OK);
     }
+
+    //Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    //        String username = authentication.getName();
 }

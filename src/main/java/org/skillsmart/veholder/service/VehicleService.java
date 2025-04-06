@@ -5,6 +5,8 @@ import org.skillsmart.veholder.entity.VehicleProjection;
 import org.skillsmart.veholder.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +34,12 @@ public class VehicleService {
 
     public List<VehicleProjection> getOnlyVehiclesList(Sort sortBy) {
         return repo.findAllProjectedBy(sortBy);
+    }
 
+    public List<VehicleProjection> getOnlyVehiclesListForManager() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return repo.getVehiclesByManager(username);
     }
 
     public VehicleProjection getVehicleProjectedById(Long id) {

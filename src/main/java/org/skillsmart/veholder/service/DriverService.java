@@ -3,9 +3,12 @@ package org.skillsmart.veholder.service;
 import org.skillsmart.veholder.entity.Driver;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.dto.DriverDto;
+import org.skillsmart.veholder.entity.dto.DriverNoDateDto;
 import org.skillsmart.veholder.repository.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,5 +51,17 @@ public class DriverService {
 
     public void delete(Long id) {
         repo.deleteById(id);
+    }
+
+    public List<DriverNoDateDto> getDriversDtoByManager() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return repo.getDriversDTOByManager(username);
+        /*return repo.getDriversDTOByManager(username)
+                .stream()
+                .map(driver -> new DriverDto(driver.getId(), driver.getName(), driver.getBirthDate(),
+                        driver.getSalary(), driver.getEnterprise().getId(),
+                        Optional.ofNullable(driver.getVehicle()).orElse(new Vehicle()).getId(), driver.isActive()))
+                .toList();*/
     }
 }

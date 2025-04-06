@@ -72,4 +72,12 @@ public interface EnterpriseRepository extends JpaRepository<Enterprise, Long> {
             nativeQuery = true
     )
     String getFullEnterpriseInfoById(@Param("enterpriseId") Long id);
+
+    @Query(
+            value = "select e.id, e.name, e.city, e.director_name from enterprises e \n" +
+                    "join enterprises_managers em on em.enterprises_id = e.id\n" +
+                    "join users u on u.id = em.managers_id and u.username = :username",
+            nativeQuery = true
+    )
+    List<Enterprise> getEnterprisesByManager(String username);
 }

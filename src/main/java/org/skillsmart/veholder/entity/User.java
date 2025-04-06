@@ -1,29 +1,53 @@
 package org.skillsmart.veholder.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
-    @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "login", nullable = false)
-    private String login;
+    @Size(min=2, message = "Не меньше 2 знаков")
+    private String username;
+    @Size(min=2, message = "Не меньше 2 знаков")
+    private String password;
 
-    @Column(name = "password", nullable = false)
-    private String pass;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;
 
-    @Enumerated(EnumType.STRING)
-    private RoleType role;
+    public User() {
+
+    }
+
+    public User(String username, String password, Set<Role> roles) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return getRoles();
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
 
     public Long getId() {
         return id;
@@ -33,28 +57,19 @@ public class User {
         this.id = id;
     }
 
-    public String getLogin() {
-        return login;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public String getPass() {
-        return pass;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setPass(String pass) {
-        this.pass = pass;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
-
-    public RoleType getRole() {
-        return role;
-    }
-
-    public void setRole(RoleType role) {
-        this.role = role;
-    }
-
 }

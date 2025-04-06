@@ -9,6 +9,8 @@
 </sec:authorize>
 <div>
     <form method="POST" action="/login">
+        <!-- Это поле добавится автоматически, если используете Thymeleaf -->
+        <!--<input type="hidden" name="_csrf" th:value="${_csrf.token}"-->
         <h2>Вход в систему</h2>
         <div>
             <input name="username" type="text" placeholder="Username"

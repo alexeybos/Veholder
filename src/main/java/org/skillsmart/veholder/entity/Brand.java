@@ -20,6 +20,13 @@ public class Brand {
     private int tank;
     private int numberOfSeats;
 
+    public Brand() {
+    }
+
+    public Brand(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

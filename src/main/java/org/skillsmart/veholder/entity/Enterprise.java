@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import org.skillsmart.veholder.entity.dto.EnterprisesDriversDto;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -22,7 +23,7 @@ import java.util.Set;
 //        }
 //    )
 //)
-@SqlResultSetMapping(
+/*@SqlResultSetMapping(
         name = "EnterpriseDriversMapping",
         classes = @ConstructorResult(
                 targetClass = EnterprisesDriversDto.class,
@@ -32,7 +33,7 @@ import java.util.Set;
                         @ColumnResult(name = "drivers", type = String.class)
                 }
         )
-)
+)*/
 public class Enterprise {
 
     @Id
@@ -43,8 +44,23 @@ public class Enterprise {
     private String city;
     private String directorName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Manager> managers;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "enterprises_managers",
+    joinColumns = @JoinColumn(name = "enterprises_id", referencedColumnName = "id"),
+    inverseJoinColumns = @JoinColumn(name = "managers_id", referencedColumnName = "id"))
+    private Set<Manager> managers = new HashSet<>();
+    //@ManyToMany(cascade = CascadeType.ALL)
+    //   @JoinTable(name="employee_task",
+    //	       joinColumns=  @JoinColumn(name="employee_id", referencedColumnName="id"),
+    //           inverseJoinColumns= @JoinColumn(name="task_id", referencedColumnName="id") )
+    //   private Set<EmployeeTask> tasks = new HashSet<EmployeeTask>();
+
+    public Enterprise() {
+    }
+
+    public Enterprise(Long id) {
+        this.id = id;
+    }
 
     public Long getId() {
         return id;
@@ -76,6 +92,14 @@ public class Enterprise {
 
     public void setDirectorName(String directorName) {
         this.directorName = directorName;
+    }
+
+    public Set<Manager> getManagers() {
+        return managers;
+    }
+
+    public void setManagers(Set<Manager> managers) {
+        this.managers = managers;
     }
 
     @Override

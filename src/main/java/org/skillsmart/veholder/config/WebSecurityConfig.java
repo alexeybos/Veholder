@@ -1,6 +1,7 @@
 package org.skillsmart.veholder.config;
 
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.skillsmart.veholder.repository.UserRepository;
 import org.skillsmart.veholder.security.JwtAuthenticationFilter;
 import org.skillsmart.veholder.security.JwtTokenUtil;
@@ -114,6 +115,14 @@ public class WebSecurityConfig {
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID", "token")
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                        })
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

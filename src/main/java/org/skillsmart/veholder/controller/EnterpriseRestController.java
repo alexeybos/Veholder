@@ -2,16 +2,18 @@ package org.skillsmart.veholder.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.skillsmart.veholder.entity.Enterprise;
+import org.skillsmart.veholder.entity.dto.EnterpriseDto;
 import org.skillsmart.veholder.service.EnterpriseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.parameters.P;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "api/enterprises")
@@ -26,7 +28,7 @@ public class EnterpriseRestController {
     }*/
 
     @GetMapping(value = "")
-    public ResponseEntity<List<Enterprise>> getEnterprises() {
+    public ResponseEntity<List<EnterpriseDto>> getEnterprises() {
         return new ResponseEntity<>(service.getEnterprisesByManager(), HttpStatus.OK);
     }
 
@@ -58,4 +60,48 @@ public class EnterpriseRestController {
         if (enterprises != null) return ResponseEntity.ok(enterprises);
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping(value = "")
+    public ResponseEntity<?> createEnterprise(@RequestBody Enterprise enterprise) {
+        try {
+            Long id = service.createEnterprise(enterprise);
+            return ResponseEntity.ok(id);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "error", "Access Denied",
+                    "message", e.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
+        }
+
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> updateEnterprise(@PathVariable Long id, @RequestBody Map<String, Object> enterprise) {
+        try {
+            service.updateEnterprise(id, enterprise);
+            return ResponseEntity.ok().build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "error", "Access Denied",
+                    "message", e.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
+        }
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<?> deleteEnterprise(@PathVariable Long id) {
+        try {
+            service.deleteEnterprise(id);
+            return ResponseEntity.ok().build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "error", "Access Denied",
+                    "message", e.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
+        }
+    }
+
 }

@@ -1,8 +1,10 @@
 package org.skillsmart.veholder.repository;
 
 import org.skillsmart.veholder.entity.Enterprise;
+import org.skillsmart.veholder.entity.dto.EnterpriseDto;
 import org.skillsmart.veholder.entity.dto.EnterprisesDriversDto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -67,7 +69,7 @@ public interface EnterpriseRepository extends JpaRepository<Enterprise, Long> {
                     "\t)\n" +
                     "\t)\n" +
                     "from enterprises e \n" +
-                    "where e.id = 1\n" +
+                    "where e.id = :enterpriseId\n" +
                     "group by e.id, e.name, e.city, e.director_name",
             nativeQuery = true
     )
@@ -79,5 +81,27 @@ public interface EnterpriseRepository extends JpaRepository<Enterprise, Long> {
                     "join users u on u.id = em.managers_id and u.username = :username",
             nativeQuery = true
     )
-    List<Enterprise> getEnterprisesByManager(String username);
+    List<EnterpriseDto> getEnterprisesByManager(String username);
+
+    @Query(
+            value = "select count(*) as cnt from enterprises_managers em " +
+                    "join users u on u.id = em.managers_id and u.username = :username " +
+                    "where em.enterprises_id = :id",
+            nativeQuery = true
+    )
+    int checkEnterpriseByManager(Long id, String username);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            value = "delete from enterprises_managers where enterprises_id = :id",
+            nativeQuery = true
+    )
+    void deleteEnterpriseManagersLink(Long id);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            value = "delete from enterprises where id = :id",
+            nativeQuery = true
+    )
+    void deleteEnterprise(Long id);
 }

@@ -1,20 +1,13 @@
 package org.skillsmart.veholder.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.skillsmart.veholder.entity.Role;
 import org.skillsmart.veholder.entity.User;
-import org.skillsmart.veholder.repository.RoleRepository;
 import org.skillsmart.veholder.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +19,10 @@ public class UserService implements UserDetailsService {
 
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -61,7 +52,7 @@ public class UserService implements UserDetailsService {
             return false;
         }
 
-        user.setRoles(Collections.singleton(new Role(1L, "ROLE_USER")));
+        //user.setRoles(Collections.singleton(new Role(1L, "ROLE_USER")));
         //user.setPassword("{noop}" + user.getPassword());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,14 +20,17 @@ public class Manager extends User {
 
     private String fullName;
 
-    @ManyToMany(mappedBy = "managers")
-    private Set<Enterprise> enterprises;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "enterprises_managers",
+            joinColumns = @JoinColumn(name = "managers_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "enterprises_id", referencedColumnName = "id"))
+    private Set<Enterprise> enterprises = new HashSet<>();
 
     protected Manager() {
     }
 
-    public Manager(String username, String password, Set<Role> authorities, String fullName) {
-        super(username, password, authorities);
+    public Manager(String username, String password, String fullName) {
+        super(username, password);
         this.fullName = fullName;
     }
 
@@ -44,5 +48,13 @@ public class Manager extends User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public Set<Enterprise> getEnterprises() {
+        return enterprises;
+    }
+
+    public void setEnterprises(Set<Enterprise> enterprises) {
+        this.enterprises = enterprises;
     }
 }

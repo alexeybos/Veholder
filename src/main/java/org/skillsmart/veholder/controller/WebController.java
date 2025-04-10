@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @Controller
-public class VehicleController {
+public class WebController {
 
     @Autowired
     private VehicleService vehicleService;

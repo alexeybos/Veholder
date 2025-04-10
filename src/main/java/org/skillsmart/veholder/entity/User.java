@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 @Entity
@@ -21,22 +22,21 @@ public class User implements UserDetails {
     @Size(min=2, message = "Не меньше 2 знаков")
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Role> roles;
+    /*@ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;*/
 
     public User() {
 
     }
 
-    public User(String username, String password, Set<Role> roles) {
+    public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.roles = roles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles();
+        return Collections.emptyList();
     }
 
     @Override
@@ -63,13 +63,5 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
     }
 }

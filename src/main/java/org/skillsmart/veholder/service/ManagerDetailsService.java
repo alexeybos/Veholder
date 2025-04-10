@@ -23,8 +23,7 @@ public class ManagerDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Manager manager = repo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Manager not found"));
-        return new Manager(manager.getUsername(), manager.getPassword(), manager.getRoles(),
-                manager.getFullName());
+        return new Manager(manager.getUsername(), manager.getPassword(), manager.getFullName());
     }
 
     public List<ManagerDTO> getManagersList() {

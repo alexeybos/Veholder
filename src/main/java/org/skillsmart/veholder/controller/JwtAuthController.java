@@ -4,8 +4,10 @@ import org.skillsmart.veholder.security.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,13 +29,17 @@ public class JwtAuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
-        Authentication auth = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password)
-        );
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.username());
-        String token = jwtTokenUtil.generateToken(userDetails);
-        return ResponseEntity.ok(token);
+        try {
+            Authentication auth = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password)
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.username());
+            String token = jwtTokenUtil.generateToken(userDetails);
+            return ResponseEntity.ok(token);
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Invalid login/password");
+        }
     }
 
     public record LoginRequest(String username, String password) {}

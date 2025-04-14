@@ -99,4 +99,19 @@ public class VehicleDTO {
     public void setEnterpriseId(Long enterpriseId) {
         this.enterpriseId = enterpriseId;
     }
+
+    @Override
+    public String toString() {
+        return "VehicleDTO{" +
+                "id=" + id +
+                ", yearOfProduction=" + yearOfProduction +
+                ", price=" + price +
+                ", color='" + color + '\'' +
+                ", mileage=" + mileage +
+                ", registrationNumber='" + registrationNumber + '\'' +
+                ", inOrder=" + inOrder +
+                ", brandId=" + brandId +
+                ", enterpriseId=" + enterpriseId +
+                '}';
+    }
 }

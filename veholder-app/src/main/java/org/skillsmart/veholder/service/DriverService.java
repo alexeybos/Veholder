@@ -7,6 +7,7 @@ import org.skillsmart.veholder.entity.dto.DriverNoDateDto;
 import org.skillsmart.veholder.repository.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ public class DriverService {
 
     @Autowired
     private DriverRepository repo;
+    @Autowired
+    private EnterpriseService enterpriseService;
 
     public List<Driver> getDrivers(Sort sortBy) {
         return repo.findAll(sortBy);
@@ -63,5 +66,12 @@ public class DriverService {
                         driver.getSalary(), driver.getEnterprise().getId(),
                         Optional.ofNullable(driver.getVehicle()).orElse(new Vehicle()).getId(), driver.isActive()))
                 .toList();*/
+    }
+
+    public Long createDriver(Driver driver) {
+        if (!enterpriseService.checkEnterpriseByManager(driver.getEnterprise().getId())) {
+            throw new AccessDeniedException("Можно добавить автомобиль только в свое предприятие!");
+        }
+        return repo.save(driver).getId();
     }
 }

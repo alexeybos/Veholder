@@ -11,6 +11,9 @@ public class DriverDto {
     private Long vehicleId;
     private boolean isActive;
 
+    public DriverDto() {
+    }
+
     public DriverDto(Long id, String name, LocalDate birthDate, double salary, Long enterpriseId,
                      Long vehicleId, boolean isActive) {
         this.id = id;
@@ -76,5 +79,18 @@ public class DriverDto {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    @Override
+    public String toString() {
+        return "DriverDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", birthDate=" + birthDate +
+                ", salary=" + salary +
+                ", enterpriseId=" + enterpriseId +
+                ", vehicleId=" + vehicleId +
+                ", isActive=" + isActive +
+                '}';
     }
 }

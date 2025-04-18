@@ -43,7 +43,10 @@ public class EnterpriseService {
 
     public List<EnterpriseDto> getEnterprisesByManager() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        return getEnterprisesByManager(authentication.getName());
+    }
+
+    public List<EnterpriseDto> getEnterprisesByManager(String username) {
         return repo.getEnterprisesByManager(username);
     }
 

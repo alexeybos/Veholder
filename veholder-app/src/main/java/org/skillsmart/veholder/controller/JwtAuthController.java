@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class JwtAuthController {
@@ -28,7 +30,7 @@ public class JwtAuthController {
     UserDetailsService userDetailsService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication auth = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password)
@@ -36,7 +38,7 @@ public class JwtAuthController {
             SecurityContextHolder.getContext().setAuthentication(auth);
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.username());
             String token = jwtTokenUtil.generateToken(userDetails);
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(Map.of("token", token));
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid login/password");
         }

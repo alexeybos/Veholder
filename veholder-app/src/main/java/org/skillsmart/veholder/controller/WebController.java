@@ -1,13 +1,9 @@
 package org.skillsmart.veholder.controller;
 
-import org.skillsmart.veholder.entity.Brand;
-import org.skillsmart.veholder.entity.Driver;
-import org.skillsmart.veholder.entity.Enterprise;
-import org.skillsmart.veholder.entity.Vehicle;
-import org.skillsmart.veholder.service.BrandService;
-import org.skillsmart.veholder.service.DriverService;
-import org.skillsmart.veholder.service.EnterpriseService;
-import org.skillsmart.veholder.service.VehicleService;
+import org.skillsmart.veholder.entity.*;
+import org.skillsmart.veholder.entity.dto.EnterpriseDto;
+import org.skillsmart.veholder.repository.ManagerRepository;
+import org.skillsmart.veholder.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -19,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -32,6 +29,8 @@ public class WebController {
     private EnterpriseService enterpriseService;
     @Autowired
     private DriverService driverService;
+    @Autowired
+    private ManagerRepository managerRepo;
 
     @GetMapping("")
     public String helloPage(Model model) {
@@ -199,6 +198,23 @@ public class WebController {
     public String saveDriver(@ModelAttribute("driver") Driver driver) {
         driverService.save(driver);
         return "redirect:/info";
+    }
+
+    @GetMapping("/enterprises")
+    public String showEnterprises(Model model, Principal principal) {
+        // Имя менеджера (можно получить из БД или JWT)
+        //Manager manager = managerRepo.findByUsername(principal.getName()).orElse(new Manager()); // Замените на реальные данные
+        //String managerName = manager.getFullName();
+        Manager manager = managerRepo.findByUsername("man3").orElse(new Manager()); // Замените на реальные данные
+        String managerName = manager.getFullName();
+        //String managerName = "тестовый Василий";
+        model.addAttribute("managerName", managerName);
+
+        // Список предприятий (пример статических данных)
+        List<EnterpriseDto> enterprises = enterpriseService.getEnterprisesByManager(manager.getUsername());
+        model.addAttribute("enterprises", enterprises);
+
+        return "enterprises";
     }
 
     /*@RequestMapping(value = "vehicle_driver/save", method = RequestMethod.POST)

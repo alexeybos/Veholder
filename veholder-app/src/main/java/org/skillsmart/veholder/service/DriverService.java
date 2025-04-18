@@ -4,8 +4,11 @@ import org.skillsmart.veholder.entity.Driver;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.dto.DriverDto;
 import org.skillsmart.veholder.entity.dto.DriverNoDateDto;
+import org.skillsmart.veholder.repository.DriverPagingRepository;
 import org.skillsmart.veholder.repository.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -20,6 +23,8 @@ public class DriverService {
 
     @Autowired
     private DriverRepository repo;
+    @Autowired
+    private DriverPagingRepository pageRepo;
     @Autowired
     private EnterpriseService enterpriseService;
 
@@ -73,5 +78,11 @@ public class DriverService {
             throw new AccessDeniedException("Можно добавить автомобиль только в свое предприятие!");
         }
         return repo.save(driver).getId();
+    }
+
+    public Page<DriverNoDateDto> getDriversDtoByManagerPaged(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return pageRepo.getDriversDTOByManager(pageable, username);
     }
 }

@@ -7,12 +7,15 @@ import org.skillsmart.veholder.entity.dto.DriverDto;
 import org.skillsmart.veholder.entity.dto.DriverNoDateDto;
 import org.skillsmart.veholder.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +31,21 @@ public class DriverRestController {
         return ResponseEntity.ok(service.getDriversDto());
     }*/
 
-    @GetMapping(value = "")
+    /*@GetMapping(value = "")
     public ResponseEntity<List<DriverNoDateDto>> getDrivers() {
         return ResponseEntity.ok(service.getDriversDtoByManager());
+    }*/
+
+    @GetMapping(value = "")
+    public ResponseEntity<Map<String, Object>> getDrivers(Pageable pageable) {
+        Page<DriverNoDateDto> page = service.getDriversDtoByManagerPaged(pageable);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("currentPage", page.getNumber());
+        response.put("totalItems", page.getTotalElements());
+        response.put("totalPages", page.getTotalPages());
+        response.put("vehicles", page.getContent());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/{id}")

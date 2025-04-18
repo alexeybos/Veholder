@@ -99,17 +99,27 @@ public class WebSecurityConfig {
                         // Доступ только для не зарегистрированных пользователей
                         .requestMatchers("/registration").not().fullyAuthenticated()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/admin/login").permitAll()
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/error").permitAll() // Разрешаем доступ к /error
+                        .requestMatchers("/enterprises").permitAll() // Разрешаем доступ к /error
+                        .requestMatchers(
+                                "/",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/webjars/**"
+                        ).permitAll()
                         //.requestMatchers("/api/**").authenticated()
                         // Все остальные страницы требуют аутентификации
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
+                /*.formLogin(form -> form
                         .loginPage("/login")
                         // Перенаправление на главную страницу после успешного входа
                         .defaultSuccessUrl("/")
                         .permitAll()
-                )
+                )*/
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")

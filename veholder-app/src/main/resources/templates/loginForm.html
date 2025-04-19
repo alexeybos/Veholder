@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <!-- Font Awesome для иконки замка -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 100px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .lock-icon {
+            font-size: 50px;
+            color: #0d6efd;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="login-container">
+        <div class="text-center">
+            <i class="fas fa-lock lock-icon"></i>
+            <h2 class="mb-4">Login</h2>
+        </div>
+
+        <!--form th:action="@{/api/auth/login}" method="post"-->
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary" onclick="login()">Войти</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script>
+    function login(event) {
+    event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+    const data = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value
+    };
+
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Login failed');
+        }
+        return response.json();
+    })
+    .then(data => {
+        localStorage.setItem('token', data.token);
+        window.location.href = '/enterprises';
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Login failed: ' + error.message);
+    });
+}
+
+// Добавьте обработчик события для формы
+document.getElementById('loginForm').addEventListener('submit', login);
+</script>
+</body>
+</html>

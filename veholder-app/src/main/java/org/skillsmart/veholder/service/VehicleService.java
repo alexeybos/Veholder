@@ -5,8 +5,11 @@ import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleProjection;
 import org.skillsmart.veholder.entity.dto.VehicleDTO;
+import org.skillsmart.veholder.repository.VehiclePagingRepository;
 import org.skillsmart.veholder.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -23,6 +26,8 @@ public class VehicleService {
 
     @Autowired
     VehicleRepository repo;
+    @Autowired
+    VehiclePagingRepository pageRepo;
     @Autowired
     private EnterpriseService enterpriseService;
 
@@ -96,6 +101,12 @@ public class VehicleService {
         }
         repo.deleteById(id);
         repo.flush();
+    }
+
+    public Page<VehicleProjection> getPagingVehicles(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return pageRepo.getVehiclesByManagerPaging(pageable, username);
     }
 
 }

@@ -26,7 +26,7 @@ public class Manager extends User {
             inverseJoinColumns = @JoinColumn(name = "enterprises_id", referencedColumnName = "id"))
     private Set<Enterprise> enterprises = new HashSet<>();
 
-    protected Manager() {
+    public Manager() {
     }
 
     public Manager(String username, String password, String fullName) {

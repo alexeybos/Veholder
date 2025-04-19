@@ -8,6 +8,8 @@ import org.skillsmart.veholder.entity.dto.VehicleDTO;
 import org.skillsmart.veholder.service.VehicleService;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,9 +18,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("api/vehicles")
@@ -39,10 +39,22 @@ public class VehicleRestController {
         return new ResponseEntity<>(service.getOnlyVehiclesList(sortBy), HttpStatus.OK);
     }*/
 
-    @GetMapping(value = "")
+    /*@GetMapping(value = "")
     public ResponseEntity<List<VehicleProjection>> getVehiclesLazy() {
         Sort sortBy = Sort.by("id").ascending();
         return new ResponseEntity<>(service.getOnlyVehiclesListForManager(), HttpStatus.OK);
+    }*/
+
+    @GetMapping(value = "")
+    public ResponseEntity<Map<String, Object>> getVehiclesPages(Pageable pageable) {
+        Page<VehicleProjection> page = service.getPagingVehicles(pageable);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("currentPage", page.getNumber());
+        response.put("totalItems", page.getTotalElements());
+        response.put("totalPages", page.getTotalPages());
+        response.put("vehicles", page.getContent());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/{id}")

@@ -6,6 +6,8 @@ import org.skillsmart.veholder.repository.ManagerRepository;
 import org.skillsmart.veholder.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -201,7 +203,7 @@ public class WebController {
     }
 
     @GetMapping("/enterprises")
-    public String showEnterprises(Model model, Principal principal) {
+    public String showEnterprises(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         // Имя менеджера (можно получить из БД или JWT)
         //Manager manager = managerRepo.findByUsername(principal.getName()).orElse(new Manager()); // Замените на реальные данные
         //String managerName = manager.getFullName();

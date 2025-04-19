@@ -77,8 +77,7 @@
     })
     .then(data => {
         localStorage.setItem('token', data.token);
-
-        window.location.href = '/enterprises'; // или куда вам нужно
+        window.location.href = '/enterprises';
     })
     .catch(error => {
         console.error('Ошибка:', error);

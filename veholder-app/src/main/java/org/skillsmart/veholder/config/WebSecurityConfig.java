@@ -1,6 +1,7 @@
 package org.skillsmart.veholder.config;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.skillsmart.veholder.repository.UserRepository;
 import org.skillsmart.veholder.security.JwtAuthenticationFilter;
@@ -102,7 +103,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/admin/login").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/error").permitAll() // Разрешаем доступ к /error
-                        .requestMatchers("/enterprises").permitAll() // Разрешаем доступ к /error
+                        //.requestMatchers("/enterprises").permitAll() // Разрешаем доступ к /error
                         .requestMatchers(
                                 "/",
                                 "/css/**",

@@ -109,4 +109,10 @@ public class VehicleService {
         return pageRepo.getVehiclesByManagerPaging(pageable, username);
     }
 
+    public Page<VehicleDTO> getPagingVehiclesByEnterprise(Pageable pageable, Long enterpriseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return pageRepo.getVehiclesByEnterprise(pageable, enterpriseId, username);
+    }
+
 }

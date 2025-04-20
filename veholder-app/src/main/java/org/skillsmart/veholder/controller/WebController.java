@@ -204,17 +204,14 @@ public class WebController {
 
     @GetMapping("/enterprises")
     public String showEnterprises(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        // Имя менеджера (можно получить из БД или JWT)
-        //Manager manager = managerRepo.findByUsername(principal.getName()).orElse(new Manager()); // Замените на реальные данные
-        //String managerName = manager.getFullName();
-        Manager manager = managerRepo.findByUsername("man3").orElse(new Manager()); // Замените на реальные данные
+        //Manager manager = managerRepo.findByUsername("man3").orElse(new Manager()); // only for tests
+        Manager manager = managerRepo.findByUsername(userDetails.getUsername()).orElse(new Manager());
         String managerName = manager.getFullName();
-        //String managerName = "тестовый Василий";
         model.addAttribute("managerName", managerName);
 
-        // Список предприятий (пример статических данных)
-        List<EnterpriseDto> enterprises = enterpriseService.getEnterprisesByManager(manager.getUsername());
-        model.addAttribute("enterprises", enterprises);
+        // Список предприятий (получение данных из сервиса)
+        //List<EnterpriseDto> enterprises = enterpriseService.getEnterprisesByManager(manager.getUsername());
+        //model.addAttribute("enterprises", enterprises);
 
         return "enterprises";
     }

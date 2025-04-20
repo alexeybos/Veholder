@@ -3,8 +3,12 @@ package org.skillsmart.veholder.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.dto.EnterpriseDto;
+import org.skillsmart.veholder.entity.dto.VehicleDTO;
 import org.skillsmart.veholder.service.EnterpriseService;
+import org.skillsmart.veholder.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,6 +16,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +26,8 @@ public class EnterpriseRestController {
 
     @Autowired
     private EnterpriseService service;
+    @Autowired
+    private VehicleService vehicleService;
 
     /*@GetMapping(value = "")
     public ResponseEntity<List<Enterprise>> getEnterprises() {
@@ -59,6 +66,18 @@ public class EnterpriseRestController {
         JsonNode enterprises = service.getDriversByEnterpriseIdJson(id);
         if (enterprises != null) return ResponseEntity.ok(enterprises);
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping(value = "/{id}/vehicles")
+    public ResponseEntity<Map<String, Object>> getVehicleFromEnterpriseById(@PathVariable Long id, Pageable pageable) {
+        Page<VehicleDTO> page = vehicleService.getPagingVehiclesByEnterprise(pageable, id);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("currentPage", page.getNumber());
+        response.put("totalItems", page.getTotalElements());
+        response.put("totalPages", page.getTotalPages());
+        response.put("vehicles", page.getContent());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping(value = "")

@@ -5,6 +5,37 @@
     <title>Список автомобилей в базе</title>
 </head>
 <body>
+    <h1>Предприятия</h1>
+    <form method="post">
+        <button th:formaction="@{/enterprise/add}" type="submit">Добавить</button>
+    </form>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Наименование</th>
+            <th>Город</th>
+            <th>Имя директора</th>
+            <th>Таймзона</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="enterprise : ${enterprises}">
+            <td th:text="${enterprise.id}"></td>
+            <td th:text="${enterprise.name}"></td>
+            <td th:text="${enterprise.city}"></td>
+            <td th:text="${enterprise.directorName}"></td>
+            <td th:text="${enterprise.timezone}"></td>
+            <td>
+                <form th:action="@{/enterprise/edit}" method="post">
+                    <button th:formaction="@{/enterprise/edit?id={id}(id=${enterprise.id})}" type="submit">Изменить</button>
+                    <button th:formaction="@{/enterprise/delete?id={id}(id=${enterprise.id})}" type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
     <h1>Автомобили в базе</h1>
         <form th:action="@{/info/vehicles}" method="post">
             <button type="submit">Обновить</button>
@@ -77,35 +108,6 @@
                 <form th:action="@{/brand/edit}" method="post">
                     <button th:formaction="@{/brand/edit?id={id}(id=${brand.id})}" type="submit">Изменить</button>
                     <button th:formaction="@{/brand/delete?id={id}(id=${brand.id})}" type="submit">Удалить</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <h1>Предприятия</h1>
-    <form method="post">
-        <button th:formaction="@{/enterprise/add}" type="submit">Добавить</button>
-    </form>
-    <table border="1">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Наименование</th>
-            <th>Город</th>
-            <th>Имя директора</th>
-            <th>Действия</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="enterprise : ${enterprises}">
-            <td th:text="${enterprise.id}"></td>
-            <td th:text="${enterprise.name}"></td>
-            <td th:text="${enterprise.city}"></td>
-            <td th:text="${enterprise.directorName}"></td>
-            <td>
-                <form th:action="@{/enterprise/edit}" method="post">
-                    <button th:formaction="@{/enterprise/edit?id={id}(id=${enterprise.id})}" type="submit">Изменить</button>
-                    <button th:formaction="@{/enterprise/delete?id={id}(id=${enterprise.id})}" type="submit">Удалить</button>
                 </form>
             </td>
         </tr>

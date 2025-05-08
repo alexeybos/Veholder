@@ -27,6 +27,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // Пропускаем запросы к /login без проверки JWT
+        if (request.getServletPath().contains("/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String token = getTokenFromCookie(request);
         final String header = request.getHeader("Authorization");
         if (token == null && (header == null || !header.startsWith("Bearer "))) {

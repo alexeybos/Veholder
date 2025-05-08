@@ -30,6 +30,8 @@ public class VehicleService {
     VehiclePagingRepository pageRepo;
     @Autowired
     private EnterpriseService enterpriseService;
+    @Autowired
+    private DriverService driverService;
 
     public void save(Vehicle vehicle) {
         repo.save(vehicle);
@@ -98,6 +100,9 @@ public class VehicleService {
         Long enterpriseId = vehicle.getEnterprise().getId();
         if (!enterpriseService.checkEnterpriseByManager(enterpriseId)) {
             throw new AccessDeniedException("Можно удалить автомобиль только из своего предприятия!");
+        }
+        if (driverService.checkDriversByVehicle(id)) {
+            throw new AccessDeniedException("К машине привязан(ы) водители. Невозможно удалить автомобиль!");
         }
         repo.deleteById(id);
         repo.flush();

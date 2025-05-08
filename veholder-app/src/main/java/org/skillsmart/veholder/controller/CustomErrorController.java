@@ -28,13 +28,13 @@ public class CustomErrorController implements ErrorController {
         Map<String, Object> errorAttributes = this.errorAttributes.getErrorAttributes(
                 webRequest,
                 ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STATUS, ErrorAttributeOptions.Include.ERROR,
-                        ErrorAttributeOptions.Include.MESSAGE)
+                        ErrorAttributeOptions.Include.MESSAGE, ErrorAttributeOptions.Include.PATH)
         );
 
         // Извлекаем статус
         Integer status = (Integer) errorAttributes.get("status");
         String errorMessage = (String) errorAttributes.get("message");
-         if (isApiRequest(request)) {
+         if (isApiRequest((String) errorAttributes.get("path"))) {
              return Map.of(
                      "error", errorAttributes.get("error"),
                      "status", status,
@@ -48,7 +48,7 @@ public class CustomErrorController implements ErrorController {
     }
 
     // Проверка, является ли запрос API-запросом
-    private boolean isApiRequest(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/api/");
+    private boolean isApiRequest(String path) {
+        return path.startsWith("/api/");
     }
 }

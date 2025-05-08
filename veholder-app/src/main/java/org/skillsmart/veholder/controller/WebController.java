@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class WebController {
@@ -142,7 +145,16 @@ public class WebController {
     @PostMapping("enterprise/add")
     public String addEnterprise(Model model) {
         Enterprise enterprise = new Enterprise();
+        List allTimezones = ZoneId.getAvailableZoneIds().stream()
+                .map(ZoneId::of)
+                .sorted(Comparator.comparing(ZoneId::getId))
+                .collect(Collectors.toList());
         model.addAttribute("enterprise", enterprise);
+        //((ZoneRegion) allTimezones.get(467)).getOffset(0)
+        model.addAttribute("allTimezones", ZoneId.getAvailableZoneIds().stream()
+                .map(ZoneId::of)
+                .sorted(Comparator.comparing(ZoneId::getId))
+                .collect(Collectors.toList()));
         return "enterprise";
     }
 
@@ -150,6 +162,10 @@ public class WebController {
     public String editEnterprise(Model model, @RequestParam Long id) {
         Enterprise enterprise = enterpriseService.getEnterpriseById(id);
         model.addAttribute("enterprise", enterprise);
+        model.addAttribute("allTimezones", ZoneId.getAvailableZoneIds().stream()
+                .map(ZoneId::of)
+                .sorted(Comparator.comparing(ZoneId::getId))
+                .collect(Collectors.toList()));
         return "enterprise";
     }
 

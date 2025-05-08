@@ -5,6 +5,27 @@
   <title>Предприятия</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .tab-content {
+      padding: 20px;
+      border: 1px solid #dee2e6;
+      border-top: none;
+      border-radius: 0 0 5px 5px;
+    }
+    .nav-tabs .nav-link.active {
+      font-weight: bold;
+    }
+    .clickable-row {
+      cursor: pointer;
+    }
+    .clickable-row:hover {
+      background-color: #f8f9fa;
+    }
+    .pagination-info {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
 <!-- Вставляем шапку -->
@@ -13,83 +34,505 @@
 <div class="container mt-4">
   <h2 class="mb-4"><i class="fas fa-building me-2"></i>Список предприятий</h2>
 
-  <div class="table-responsive">
+  <div class="table-responsive mb-4">
     <table id="enterprisesTable" class="table table-striped table-hover">
-      <!--<thead class="table-dark">
-      <tr>
-        <th>#</th>
-        <th>Наименование</th>
-        <th>Город</th>
-        <th>Директор</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="enterprise, iterStat : ${enterprises}">
-        <td th:text="${iterStat.count}"></td>
-        <td th:text="${enterprise.name}"></td>
-        <td th:text="${enterprise.city}"></td>
-        <td th:text="${enterprise.directorName}"></td>
-      </tr>
-      </tbody>-->
+      <!-- Таблица предприятий будет заполнена через JS -->
     </table>
+  </div>
+
+  <!-- Вкладки -->
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="cars-tab" data-bs-toggle="tab"
+              data-bs-target="#cars-tab-pane" type="button" role="tab">
+        Автомобили предприятия
+      </button>
+    </li>
+  </ul>
+
+  <!-- Содержимое вкладок -->
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="cars-tab-pane" role="tabpanel">
+      <!-- Пагинация и информация -->
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <button id="refreshCarsBtn" class="btn btn-sm btn-outline-primary me-2">
+            <i class="fas fa-sync-alt"></i> Обновить
+          </button>
+          <button id="addCarBtn" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                  data-bs-target="#carModal" data-mode="add">
+            <i class="fas fa-plus"></i> Добавить
+          </button>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+          <div class="pagination-info me-3" id="paginationInfo">
+            Показано 0 из 0
+          </div>
+          <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm" id="paginationControls">
+              <li class="page-item disabled">
+                <a class="page-link" href="#" id="prevPage">Назад</a>
+              </li>
+              <li class="page-item disabled">
+                <a class="page-link" href="#" id="nextPage">Вперед</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <!--div class="d-flex justify-content-between mb-3">
+        <h4>Список автомобилей</h4>
+        <div>
+          <button id="refreshCarsBtn" class="btn btn-sm btn-outline-primary me-2">
+            <i class="fas fa-sync-alt"></i> Обновить
+          </button>
+          <button id="addCarBtn" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                  data-bs-target="#carModal" data-mode="add">
+            <i class="fas fa-plus"></i> Добавить
+          </button>
+        </div>
+      </div-->
+
+      <div class="table-responsive mb-3">
+        <table id="carsTable" class="table table-striped">
+          <thead>
+          <tr>
+            <th>Марка</th>
+            <th>Цвет</th>
+            <th>Гос. номер</th>
+            <th>Год выпуска</th>
+            <th>Действия</th>
+          </tr>
+          </thead>
+          <tbody id="carsTableBody">
+          <!-- Список автомобилей будет заполнен через JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для добавления/редактирования автомобиля -->
+<div class="modal fade" id="carModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Добавить автомобиль</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="carForm">
+          <input type="hidden" id="carId">
+          <div class="mb-3">
+            <label for="brand" class="form-label">Марка</label>
+            <select class="form-select" id="brand" required>
+              <option value="" selected disabled>Выберите марку</option>
+              <!-- бренды будут заполнены через JS -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="color" class="form-label">Цвет</label>
+            <input type="text" class="form-control" id="color" required>
+          </div>
+          <div class="mb-3">
+            <label for="registrationNumber" class="form-label">Гос. номер</label>
+            <input type="text" class="form-control" id="registrationNumber" required>
+          </div>
+          <div class="mb-3">
+            <label for="yearOfProduction" class="form-label">Год выпуска</label>
+            <input type="number" class="form-control" id="yearOfProduction" min="1900" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="saveCarBtn">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Подтверждение удаления</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Вы действительно хотите удалить этот автомобиль?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Удалить</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+  let selectedEnterpriseId = null;
+  let brandsList = [];
+  let currentCarId = null;
+  let currentPage = 0;
+  const pageSize = 20;
+  let totalCars = 0;
+  const carModal = new bootstrap.Modal(document.getElementById('carModal'));
+  const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+
   // Загружаем данные при открытии страницы
   document.addEventListener('DOMContentLoaded', () => {
-      fetchEnterprises();
+    fetchEnterprises();
+    fetchBrands(); // Загружаем список брендов
+
+    // Назначаем обработчики кнопок
+    document.getElementById('refreshCarsBtn').addEventListener('click', fetchCars);
+    document.getElementById('saveCarBtn').addEventListener('click', saveCar);
+    document.getElementById('confirmDeleteBtn').addEventListener('click', deleteCar);
+    document.getElementById('prevPage').addEventListener('click', goToPrevPage);
+    document.getElementById('nextPage').addEventListener('click', goToNextPage);
   });
 
-  // Функция для запроса данных с токеном
+  // Загрузка списка брендов
+  async function fetchBrands() {
+    try {
+        const response = await fetch('/api/brands', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Ошибка загрузки списка брендов');
+
+        brandsList = await response.json();
+        populateBrandsDropdown();
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert(error.message);
+    }
+}
+
+// Заполнение выпадающего списка брендов
+  function populateBrandsDropdown() {
+    const brandSelect = document.getElementById('brand');
+    brandSelect.innerHTML = '<option value="" selected disabled>Выберите марку</option>';
+
+    brandsList.forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand.id;
+        option.textContent = brand.name;
+        brandSelect.appendChild(option);
+    });
+}
+
+  // Навигация по страницам
+  function goToPrevPage(e) {
+    e.preventDefault();
+    if (currentPage > 0) {
+      currentPage--;
+      fetchCars();
+    }
+  }
+
+  function goToNextPage(e) {
+    e.preventDefault();
+    if ((currentPage + 1) * pageSize < totalCars) {
+      currentPage++;
+      fetchCars();
+    }
+  }
+
+  // Функция для запроса данных предприятий
   async function fetchEnterprises() {
-      try {
-          const response = await fetch('/api/enterprises', {
-              headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-          });
+    try {
+      const response = await fetch('/api/enterprises', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
 
-          if (!response.ok) {
-              if (response.status === 401) {
-                  window.location.href = '/login?error=auth';
-              }
-              throw new Error('Ошибка загрузки данных');
-          }
-
-          const enterprises = await response.json();
-          renderTable(enterprises);
-      } catch (error) {
-          console.error('Ошибка:', error);
-          alert('Не удалось загрузить данные');
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = '/login?error=auth';
+        }
+        throw new Error('Ошибка загрузки данных предприятий');
       }
+
+      const enterprises = await response.json();
+      renderEnterprisesTable(enterprises);
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert(error.message);
+    }
   }
 
-  // Отрисовка таблицы
-  function renderTable(enterprises) {
-      const table = document.getElementById('enterprisesTable');
-      table.innerHTML = `
-          <thead class="table-dark">
-              <tr>
-                  <th>#</th>
-                  <th>Наименование</th>
-                  <th>Город</th>
-                  <th>Директор</th>
-              </tr>
-          </thead>
-          <tbody>
-              ${enterprises.map((enterprise, index) => `
-                  <tr>
-                      <td>${index + 1}</td>
-                      <td>${enterprise.name}</td>
-                      <td>${enterprise.city}</td>
-                      <td>${enterprise.director}</td>
-                  </tr>
-              `).join('')}
-          </tbody>
-      `;
+  // Отрисовка таблицы предприятий
+  function renderEnterprisesTable(enterprises) {
+    const table = document.getElementById('enterprisesTable');
+    table.innerHTML = `
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Наименование</th>
+          <th>Город</th>
+          <th>Директор</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${enterprises.map((enterprise, index) => `
+          <tr class="clickable-row enterprise-row" data-id="${enterprise.id}">
+            <td>${index + 1}</td>
+            <td>${enterprise.name}</td>
+            <td>${enterprise.city}</td>
+            <td>${enterprise.directorName}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    `;
+
+    // Назначаем обработчики строк предприятий
+    document.querySelectorAll('.enterprise-row').forEach(row => {
+      row.addEventListener('click', function() {
+        // Убираем выделение у всех строк
+        document.querySelectorAll('.enterprise-row').forEach(r => {
+          r.classList.remove('table-primary');
+        });
+
+        // Выделяем текущую строку
+        this.classList.add('table-primary');
+
+        // Запоминаем выбранное предприятие
+        selectedEnterpriseId = this.getAttribute('data-id');
+
+        // Сбрасываем пагинацию и загружаем автомобили
+        currentPage = 0;
+        fetchCars();
+      });
+    });
   }
+
+  // Загрузка автомобилей предприятия
+  async function fetchCars() {
+    if (!selectedEnterpriseId) {
+      alert('Выберите предприятие из списка');
+      return;
+    }
+
+    try {
+      //const response = await fetch(`/api/enterprises/${selectedEnterpriseId}/vehicles?page=0&size=7&sort=year_of_production,desc&sort=registration_number,asc`, {
+      const response = await fetch(`/api/enterprises/${selectedEnterpriseId}/vehicles?page=${currentPage}&size=${pageSize}&sort=year_of_production,desc&sort=registration_number,asc`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Ошибка загрузки автомобилей');
+
+      const responseData = await response.json();
+      totalCars = responseData.totalItems;
+      const cars = responseData.vehicles || responseData;
+      renderCarsTable(cars);
+      updatePaginationControls();
+      updatePaginationInfo(cars.length, totalCars);
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert(error.message);
+    }
+  }
+
+  // Обновление информации о пагинации
+  function updatePaginationInfo(currentCount, total) {
+    const startItem = currentPage * pageSize + 1;
+    const endItem = startItem + currentCount - 1;
+    document.getElementById('paginationInfo').textContent =
+      `Показано ${startItem}-${endItem} из ${total}`;
+  }
+
+  // Обновление состояния кнопок пагинации
+  function updatePaginationControls() {
+    document.getElementById('prevPage').parentElement.classList.toggle(
+      'disabled', currentPage === 0
+    );
+    document.getElementById('nextPage').parentElement.classList.toggle(
+      'disabled', (currentPage + 1) * pageSize >= totalCars
+    );
+  }
+
+  // Отрисовка таблицы автомобилей
+  function renderCarsTable(cars) {
+    //console.error('Получено:', cars);
+    //return;
+    if (!Array.isArray(cars)) {
+        console.error('Ожидался массив автомобилей, получено:', cars);
+        return;
+    }
+    const tbody = document.getElementById('carsTableBody');
+    tbody.innerHTML = cars.map(car => `
+      <tr data-id="${car.id}">
+        <td>${car.brandName}</td>
+        <td>${car.color}</td>
+        <td>${car.registrationNumber}</td>
+        <td>${car.yearOfProduction}</td>
+        <td>
+          <button class="btn btn-sm btn-primary me-2 edit-car-btn"
+                  data-bs-toggle="modal" data-bs-target="#carModal"
+                  data-car-id="${car.id}">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn btn-sm btn-danger delete-car-btn"
+                  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                  data-car-id="${car.id}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    // Назначаем обработчики кнопок редактирования
+    document.querySelectorAll('.edit-car-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const carId = this.getAttribute('data-car-id');
+        openEditModal(carId);
+      });
+    });
+
+    // Назначаем обработчики кнопок удаления
+    document.querySelectorAll('.delete-car-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        currentCarId = this.getAttribute('data-car-id');
+      });
+    });
+  }
+
+  // Открытие модального окна для редактирования
+  async function openEditModal(carId) {
+    try {
+      const response = await fetch(`/api/vehicles/${carId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Ошибка загрузки данных автомобиля');
+
+      const car = await response.json();
+
+      // Заполняем форму
+      document.getElementById('modalTitle').textContent = 'Редактировать автомобиль';
+      document.getElementById('carId').value = car.id;
+      //document.getElementById('brandName').value = car.brandName;
+      document.getElementById('brand').value = car.brandId; // Устанавливаем выбранный бренд
+      document.getElementById('color').value = car.color;
+      document.getElementById('registrationNumber').value = car.registrationNumber;
+      document.getElementById('yearOfProduction').value = car.yearOfProduction;
+
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert(error.message);
+    }
+  }
+
+  // Сохранение автомобиля (добавление/редактирование)
+  async function saveCar() {
+    if (!selectedEnterpriseId) {
+      alert('Выберите предприятие из списка');
+      return;
+    }
+
+    const brandSelect = document.getElementById('brand');
+    if (!brandSelect.value) {
+        alert('Выберите марку автомобиля');
+        return;
+    }
+
+    const carData = {
+      enterpriseId: selectedEnterpriseId,
+      brandId: brandSelect.value,
+      color: document.getElementById('color').value,
+      registrationNumber: document.getElementById('registrationNumber').value,
+      yearOfProduction: document.getElementById('yearOfProduction').value
+    };
+
+    console.log(carData)
+
+    const carId = document.getElementById('carId').value;
+    const url = carId ? `/api/vehicles/${carId}` : `/api/vehicles`;
+    const method = carId ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(carData)
+      });
+
+      if (!response.ok) throw new Error('Ошибка сохранения');
+
+      // Закрываем модальное окно
+      carModal.hide();
+
+      // Обновляем список автомобилей
+      fetchCars();
+
+      // Очищаем форму
+      document.getElementById('carForm').reset();
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert(error.message);
+    }
+  }
+
+  // Удаление автомобиля
+  async function deleteCar() {
+    if (!currentCarId) return;
+
+    try {
+      const response = await fetch(`/api/vehicles/${currentCarId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        // Теперь errorData содержит объект с ошибкой
+        console.log(errorData.message);
+        // Выводим сообщение на экран
+        alert(errorData.message);
+        //throw new Error('Ошибка удаления');
+      }
+
+      // Закрываем модальное окно
+      confirmDeleteModal.hide();
+
+      // Обновляем список автомобилей
+      fetchCars();
+
+      // Сбрасываем ID
+      currentCarId = null;
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert(error.message);
+    }
+  }
+
+  // Обработчик открытия модального окна для добавления
+  document.getElementById('carModal').addEventListener('show.bs.modal', function(event) {
+    const button = event.relatedTarget;
+    if (button.getAttribute('data-mode') === 'add') {
+      document.getElementById('modalTitle').textContent = 'Добавить автомобиль';
+      document.getElementById('carForm').reset();
+      document.getElementById('carId').value = '';
+      document.getElementById('brand').value = ''; // Сбрасываем выбор бренда
+    }
+  });
 </script>
 </body>
 </html>

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import org.skillsmart.veholder.entity.dto.EnterprisesDriversDto;
 
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,6 +44,7 @@ public class Enterprise {
     private String name;
     private String city;
     private String directorName;
+    private ZoneId timezone;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "enterprises_managers",
@@ -102,6 +104,14 @@ public class Enterprise {
         this.managers = managers;
     }
 
+    public ZoneId getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(ZoneId timezone) {
+        this.timezone = timezone;
+    }
+
     @Override
     public String toString() {
         return "Enterprise{" +
@@ -109,6 +119,8 @@ public class Enterprise {
                 ", name='" + name + '\'' +
                 ", city='" + city + '\'' +
                 ", directorName='" + directorName + '\'' +
+                ", timezone=" + timezone +
+                ", managers=" + managers +
                 '}';
     }
 }

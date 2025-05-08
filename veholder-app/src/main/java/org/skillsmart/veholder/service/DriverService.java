@@ -85,4 +85,8 @@ public class DriverService {
         String username = authentication.getName();
         return pageRepo.getDriversDTOByManager(pageable, username);
     }
+
+    public boolean checkDriversByVehicle(Long vehicleId) {
+        return repo.getDriversCountOnVehicle(vehicleId) > 0;
+    }
 }

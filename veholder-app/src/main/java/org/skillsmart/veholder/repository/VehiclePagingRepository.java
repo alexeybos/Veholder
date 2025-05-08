@@ -2,6 +2,7 @@ package org.skillsmart.veholder.repository;
 
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleProjection;
+import org.skillsmart.veholder.entity.dto.VehicleDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,5 +30,14 @@ public interface VehiclePagingRepository extends PagingAndSortingRepository<Vehi
             nativeQuery = true
     )
     Page<VehicleProjection> getVehiclesByManagerPaging(Pageable pageable, String manager);
+
+    @Query(
+            value = "select v.id, v.year_of_production, v.price, v.color, v.mileage, v.registration_number, v.in_order, v.brand_id, v.enterprise_id, b.name as brand_name \n" +
+                    "from vehicle v join brand b on b.id = v.brand_id " +
+                    "where v.enterprise_id in (select em.enterprises_id from enterprises_managers em join users u on u.id = em.managers_id " +
+                    "and u.username = :manager where em.enterprises_id = :enterpriseId)",
+            nativeQuery = true
+    )
+    Page<VehicleDTO> getVehiclesByEnterprise(Pageable pageable, Long enterpriseId, String manager);
 
 }

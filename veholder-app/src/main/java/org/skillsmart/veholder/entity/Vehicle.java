@@ -1,13 +1,9 @@
 package org.skillsmart.veholder.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
+import java.time.Instant;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
@@ -23,6 +19,8 @@ public class Vehicle {
     private int mileage;
     private String registrationNumber;
     private boolean inOrder;
+    @Column(name = "purchase_utc")
+    private Instant purchaseDateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
@@ -105,6 +103,14 @@ public class Vehicle {
         this.enterprise = enterprise;
     }
 
+    public Instant getPurchaseDateTime() {
+        return purchaseDateTime;
+    }
+
+    public void setPurchaseDateTime(Instant purchaseDateTime) {
+        this.purchaseDateTime = purchaseDateTime;
+    }
+
     @Override
     public String toString() {
         return "Vehicle{" +
@@ -115,6 +121,7 @@ public class Vehicle {
                 ", mileage=" + mileage +
                 ", registrationNumber='" + registrationNumber + '\'' +
                 ", inOrder=" + inOrder +
+                ", purchaseDateTime=" + purchaseDateTime +
                 ", brand=" + brand +
                 ", enterprise=" + enterprise +
                 '}';

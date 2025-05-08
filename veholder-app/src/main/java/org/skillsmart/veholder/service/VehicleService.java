@@ -30,6 +30,8 @@ public class VehicleService {
     VehiclePagingRepository pageRepo;
     @Autowired
     private EnterpriseService enterpriseService;
+    @Autowired
+    private DriverService driverService;
 
     public void save(Vehicle vehicle) {
         repo.save(vehicle);
@@ -99,6 +101,9 @@ public class VehicleService {
         if (!enterpriseService.checkEnterpriseByManager(enterpriseId)) {
             throw new AccessDeniedException("Можно удалить автомобиль только из своего предприятия!");
         }
+        if (driverService.checkDriversByVehicle(id)) {
+            throw new AccessDeniedException("К машине привязан(ы) водители. Невозможно удалить автомобиль!");
+        }
         repo.deleteById(id);
         repo.flush();
     }
@@ -107,6 +112,12 @@ public class VehicleService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return pageRepo.getVehiclesByManagerPaging(pageable, username);
+    }
+
+    public Page<VehicleDTO> getPagingVehiclesByEnterprise(Pageable pageable, Long enterpriseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return pageRepo.getVehiclesByEnterprise(pageable, enterpriseId, username);
     }
 
 }

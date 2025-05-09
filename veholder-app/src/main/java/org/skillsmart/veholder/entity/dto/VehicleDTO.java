@@ -1,5 +1,11 @@
 package org.skillsmart.veholder.entity.dto;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class VehicleDTO {
 
     private Long id;
@@ -13,12 +19,14 @@ public class VehicleDTO {
     private Long brandId;
     private Long enterpriseId;
     private String brandName;
+    private Instant purchaseDateTimeUTC;
+    private Timestamp purchaseDateTime;
 
     public VehicleDTO() {
     }
 
     public VehicleDTO(Long id, int yearOfProduction, double price, String color, int mileage, String registrationNumber,
-                      boolean inOrder, Long brandId, Long enterpriseId, String brandName) {
+                      boolean inOrder, Long brandId, Long enterpriseId, String brandName, Instant purchaseDateTimeUTC, Timestamp purchaseDateTime) {
         this.id = id;
         this.yearOfProduction = yearOfProduction;
         this.price = price;
@@ -29,6 +37,8 @@ public class VehicleDTO {
         this.brandId = brandId;
         this.enterpriseId = enterpriseId;
         this.brandName = brandName;
+        this.purchaseDateTimeUTC = purchaseDateTimeUTC;
+        this.purchaseDateTime = purchaseDateTime;
     }
 
     public Long getId() {
@@ -111,6 +121,28 @@ public class VehicleDTO {
         this.brandName = brandName;
     }
 
+    public Instant getPurchaseDateTimeUTC() {
+        return purchaseDateTimeUTC;
+    }
+
+    public void setPurchaseDateTimeUTC(Instant purchaseDateTimeUTC) {
+        this.purchaseDateTimeUTC = purchaseDateTimeUTC;
+    }
+
+    public String getLocalPurchaseDateTime(ZoneId targetZone) {
+        return ZonedDateTime.ofInstant(purchaseDateTimeUTC, targetZone)
+                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
+                //.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    public Timestamp getPurchaseDateTime() {
+        return purchaseDateTime;
+    }
+
+    public void setPurchaseDateTime(Timestamp purchaseDateTime) {
+        this.purchaseDateTime = purchaseDateTime;
+    }
+
     @Override
     public String toString() {
         return "VehicleDTO{" +
@@ -124,6 +156,7 @@ public class VehicleDTO {
                 ", brandId=" + brandId +
                 ", enterpriseId=" + enterpriseId +
                 ", brandName='" + brandName + '\'' +
+                ", purchaseDateTime=" + purchaseDateTimeUTC +
                 '}';
     }
 

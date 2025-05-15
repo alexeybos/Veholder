@@ -61,6 +61,7 @@ public interface EnterpriseRepository extends JpaRepository<Enterprise, Long> {
                     "\t'name', e.name,\n" +
                     "\t'city', e.city, \n" +
                     "\t'director_name', e.director_name,\n" +
+                    "\t'timezone', e.timezone,\n" +
                     "\t'drivers', (\n" +
                     "\t\tselect json_agg(d.id) from drivers d where d.enterprise_id = e.id\n" +
                     "\t\t),\n" +
@@ -76,7 +77,7 @@ public interface EnterpriseRepository extends JpaRepository<Enterprise, Long> {
     String getFullEnterpriseInfoById(@Param("enterpriseId") Long id);
 
     @Query(
-            value = "select e.id, e.name, e.city, e.director_name from enterprises e \n" +
+            value = "select e.id, e.name, e.city, e.director_name, e.timezone from enterprises e \n" +
                     "join enterprises_managers em on em.enterprises_id = e.id\n" +
                     "join users u on u.id = em.managers_id and u.username = :username",
             nativeQuery = true

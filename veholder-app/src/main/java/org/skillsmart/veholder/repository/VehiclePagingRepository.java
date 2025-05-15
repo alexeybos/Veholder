@@ -32,8 +32,10 @@ public interface VehiclePagingRepository extends PagingAndSortingRepository<Vehi
     Page<VehicleProjection> getVehiclesByManagerPaging(Pageable pageable, String manager);
 
     @Query(
-            value = "select v.id, v.year_of_production, v.price, v.color, v.mileage, v.registration_number, v.in_order, v.brand_id, v.enterprise_id, b.name as brand_name \n" +
+            value = "select v.id, v.year_of_production, v.price, v.color, v.mileage, v.registration_number, v.in_order, v.brand_id, v.enterprise_id, " +
+                    "b.name as brand_name, v.purchase_utc as purchase_utc, v.purchase_utc AT TIME ZONE coalesce(e.timezone, 'UTC') as purchase_date \n" +
                     "from vehicle v join brand b on b.id = v.brand_id " +
+                    "inner join enterprises e on e.id = v.enterprise_id " +
                     "where v.enterprise_id in (select em.enterprises_id from enterprises_managers em join users u on u.id = em.managers_id " +
                     "and u.username = :manager where em.enterprises_id = :enterpriseId)",
             nativeQuery = true

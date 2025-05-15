@@ -1,5 +1,7 @@
 package org.skillsmart.veholder.entity;
 
+import java.time.Instant;
+
 public interface VehicleProjection {
     Long getId();
     Long getBrandId();
@@ -10,4 +12,5 @@ public interface VehicleProjection {
     String getRegistrationNumber();
     boolean isInOrder();
     Long getEnterpriseId();
+    Instant getPurchaseDateTime();
 }

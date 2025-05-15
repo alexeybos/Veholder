@@ -44,6 +44,12 @@ public class EnterpriseService {
     public List<EnterpriseDto> getEnterprisesByManager() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getEnterprisesByManager(authentication.getName());
+        /*return repo.getDriversDTOByManager(username)
+                .stream()
+                .map(driver -> new DriverDto(driver.getId(), driver.getName(), driver.getBirthDate(),
+                        driver.getSalary(), driver.getEnterprise().getId(),
+                        Optional.ofNullable(driver.getVehicle()).orElse(new Vehicle()).getId(), driver.isActive()))
+                .toList();*/
     }
 
     public List<EnterpriseDto> getEnterprisesByManager(String username) {

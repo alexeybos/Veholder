@@ -4,5 +4,7 @@ public record EnterpriseDto(
         Long id,
         String name,
         String city,
-        String directorName
+        String directorName,
+        String timezone
+        //,String timezoneFullName
 ) {}

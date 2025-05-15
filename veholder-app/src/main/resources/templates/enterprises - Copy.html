@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Предприятия</title>
@@ -63,10 +63,6 @@
                   data-bs-target="#carModal" data-mode="add">
             <i class="fas fa-plus"></i> Добавить
           </button>
-          <button id="editEnterpriseBtn" class="btn btn-sm btn-warning" data-bs-toggle="modal"
-                  data-bs-target="#enterpriseModal" disabled>
-            <i class="fas fa-edit"></i> Редактировать предприятие
-          </button>
         </div>
         <div class="d-flex justify-content-between mb-3">
           <div class="pagination-info me-3" id="paginationInfo">
@@ -84,6 +80,18 @@
           </nav>
         </div>
       </div>
+      <!--div class="d-flex justify-content-between mb-3">
+        <h4>Список автомобилей</h4>
+        <div>
+          <button id="refreshCarsBtn" class="btn btn-sm btn-outline-primary me-2">
+            <i class="fas fa-sync-alt"></i> Обновить
+          </button>
+          <button id="addCarBtn" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                  data-bs-target="#carModal" data-mode="add">
+            <i class="fas fa-plus"></i> Добавить
+          </button>
+        </div>
+      </div-->
 
       <div class="table-responsive mb-3">
         <table id="carsTable" class="table table-striped">
@@ -93,7 +101,6 @@
             <th>Цвет</th>
             <th>Гос. номер</th>
             <th>Год выпуска</th>
-            <th>Дата покупки</th>
             <th>Действия</th>
           </tr>
           </thead>
@@ -136,50 +143,11 @@
             <label for="yearOfProduction" class="form-label">Год выпуска</label>
             <input type="number" class="form-control" id="yearOfProduction" min="1900" required>
           </div>
-          <div class="mb-3">
-            <label for="purchaseDate" class="form-label">Дата покупки</label>
-            <input type="datetime-local" class="form-control" id="purchaseDate" required>
-          </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
         <button type="button" class="btn btn-primary" id="saveCarBtn">Сохранить</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Модальное окно для редактирования предприятия -->
-<div class="modal fade" id="enterpriseModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Редактировать предприятие</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="enterpriseForm">
-          <input type="hidden" id="enterpriseId">
-          <div class="mb-3">
-            <label for="enterpriseName" class="form-label">Название</label>
-            <input type="text" class="form-control" id="enterpriseName" required>
-          </div>
-          <div class="mb-3">
-            <label for="enterpriseCity" class="form-label">Город</label>
-            <input type="text" class="form-control" id="enterpriseCity" required>
-          </div>
-          <div class="mb-3">
-            <label for="enterpriseTimezone" class="form-label">Таймзона</label>
-            <select class="form-select" id="enterpriseTimezone" required>
-              <!-- Таймзоны будут заполнены через JS -->
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-        <button type="button" class="btn btn-primary" id="saveEnterpriseBtn">Сохранить</button>
       </div>
     </div>
   </div>
@@ -207,124 +175,58 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   let selectedEnterpriseId = null;
-  let selectedEnterpriseTimezone = null;
   let brandsList = [];
-  let timezonesList = [];
   let currentCarId = null;
   let currentPage = 0;
   const pageSize = 20;
   let totalCars = 0;
   const carModal = new bootstrap.Modal(document.getElementById('carModal'));
-  const enterpriseModal = new bootstrap.Modal(document.getElementById('enterpriseModal'));
   const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
 
   // Загружаем данные при открытии страницы
   document.addEventListener('DOMContentLoaded', () => {
     fetchEnterprises();
-    fetchBrands();
-    fetchTimezones();
+    fetchBrands(); // Загружаем список брендов
 
     // Назначаем обработчики кнопок
     document.getElementById('refreshCarsBtn').addEventListener('click', fetchCars);
     document.getElementById('saveCarBtn').addEventListener('click', saveCar);
-    document.getElementById('saveEnterpriseBtn').addEventListener('click', saveEnterprise);
     document.getElementById('confirmDeleteBtn').addEventListener('click', deleteCar);
     document.getElementById('prevPage').addEventListener('click', goToPrevPage);
     document.getElementById('nextPage').addEventListener('click', goToNextPage);
-    document.getElementById('editEnterpriseBtn').addEventListener('click', openEditEnterpriseModal);
   });
-
-  function getTimezonesWithOffsets() {
-    const timezones = Intl.supportedValuesOf('timeZone').sort();
-    const now = new Date();
-
-    return timezones.map(zone => {
-      try {
-        const offset = Intl.DateTimeFormat('en', {
-          timeZone: zone,
-          timeZoneName: 'shortOffset'
-        }).formatToParts(now)
-          .find(part => part.type === 'timeZoneName').value;
-
-        return {
-          id: zone,
-          display: `${zone} (${offset})`
-        };
-      } catch (e) {
-        return {
-          id: zone,
-          display: zone
-        };
-      }
-    });
-  }
-
-  // Загрузка списка таймзон
-  async function fetchTimezones() {
-    try {
-      //timezonesList = Intl.supportedValuesOf('timeZone').sort();
-      timezonesList = getTimezonesWithOffsets();
-    } catch (error) {
-      console.error('Ошибка загрузки списка таймзон:', error);
-      // Fallback список таймзон
-      timezonesList = [
-        {id: 'Europe/Moscow', display: 'Europe/Moscow (GMT+3)'},
-        {id: 'UTC', display: 'UTC (GMT+0)'}
-      ];
-    }
-  }
 
   // Загрузка списка брендов
   async function fetchBrands() {
     try {
-      const response = await fetch('/api/brands', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+        const response = await fetch('/api/brands', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
 
-      if (!response.ok) throw new Error('Ошибка загрузки списка брендов');
+        if (!response.ok) throw new Error('Ошибка загрузки списка брендов');
 
-      brandsList = await response.json();
-      populateBrandsDropdown();
+        brandsList = await response.json();
+        populateBrandsDropdown();
     } catch (error) {
-      console.error('Ошибка:', error);
-      alert(error.message);
+        console.error('Ошибка:', error);
+        alert(error.message);
     }
-  }
+}
 
-  // Заполнение выпадающего списка брендов
+// Заполнение выпадающего списка брендов
   function populateBrandsDropdown() {
     const brandSelect = document.getElementById('brand');
     brandSelect.innerHTML = '<option value="" selected disabled>Выберите марку</option>';
 
     brandsList.forEach(brand => {
-      const option = document.createElement('option');
-      option.value = brand.id;
-      option.textContent = brand.name;
-      brandSelect.appendChild(option);
+        const option = document.createElement('option');
+        option.value = brand.id;
+        option.textContent = brand.name;
+        brandSelect.appendChild(option);
     });
-  }
-
-  // Заполнение выпадающего списка таймзон
-  function populateTimezonesDropdown() {
-    const timezoneSelect = document.getElementById('enterpriseTimezone');
-    timezoneSelect.innerHTML = '';
-
-    //timezonesList.forEach(zone => {
-    //  const option = document.createElement('option');
-    //  option.value = zone;
-    //  option.textContent = zone;
-    //  timezoneSelect.appendChild(option);
-    //});
-
-    timezonesList.forEach(zone => {
-      const option = document.createElement('option');
-      option.value = zone.id;  // Сохраняем ZoneId в value
-      option.textContent = zone.display;  // Показываем с смещением
-      timezoneSelect.appendChild(option);
-    });
-  }
+}
 
   // Навигация по страницам
   function goToPrevPage(e) {
@@ -376,17 +278,15 @@
           <th>#</th>
           <th>Наименование</th>
           <th>Город</th>
-          <th>Таймзона</th>
           <th>Директор</th>
         </tr>
       </thead>
       <tbody>
         ${enterprises.map((enterprise, index) => `
-          <tr class="clickable-row enterprise-row" data-id="${enterprise.id}" data-timezone="${enterprise.timezone || 'UTC'}">
+          <tr class="clickable-row enterprise-row" data-id="${enterprise.id}">
             <td>${index + 1}</td>
             <td>${enterprise.name}</td>
             <td>${enterprise.city}</td>
-            <td>${enterprise.timezone || 'UTC'}</td>
             <td>${enterprise.directorName}</td>
           </tr>
         `).join('')}
@@ -406,10 +306,6 @@
 
         // Запоминаем выбранное предприятие
         selectedEnterpriseId = this.getAttribute('data-id');
-        selectedEnterpriseTimezone = this.getAttribute('data-timezone');
-
-        // Активируем кнопку редактирования предприятия
-        document.getElementById('editEnterpriseBtn').disabled = false;
 
         // Сбрасываем пагинацию и загружаем автомобили
         currentPage = 0;
@@ -426,6 +322,7 @@
     }
 
     try {
+      //const response = await fetch(`/api/enterprises/${selectedEnterpriseId}/vehicles?page=0&size=7&sort=year_of_production,desc&sort=registration_number,asc`, {
       const response = await fetch(`/api/enterprises/${selectedEnterpriseId}/vehicles?page=${currentPage}&size=${pageSize}&sort=year_of_production,desc&sort=registration_number,asc`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -466,51 +363,33 @@
 
   // Отрисовка таблицы автомобилей
   function renderCarsTable(cars) {
+    //console.error('Получено:', cars);
+    //return;
+    if (!Array.isArray(cars)) {
+        console.error('Ожидался массив автомобилей, получено:', cars);
+        return;
+    }
     const tbody = document.getElementById('carsTableBody');
-    tbody.innerHTML = cars.map(car => {
-      // Преобразуем дату покупки в локальное время браузера
-      let purchaseDate = 'Нет данных';
-      if (car.purchaseDateTimeUTC) {
-        try {
-          // Преобразуем UTC время в таймзону предприятия, затем в таймзону браузера
-          const utcDate = new Date(car.purchaseDateTimeUTC);
-          //const enterpriseDate = new Date(utcDate.toLocaleString('en-US', { timeZone: selectedEnterpriseTimezone }));
-          // Форматируем дату сразу в таймзону браузера
-                purchaseDate = utcDate.toLocaleString(navigator.language, {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-        } catch (e) {
-          console.error('Ошибка форматирования даты:', e);
-          purchaseDate = new Date(car.purchaseDateTimeUTC).toLocaleString();
-        }
-      }
-
-      return `
-        <tr data-id="${car.id}">
-          <td>${car.brandName}</td>
-          <td>${car.color}</td>
-          <td>${car.registrationNumber}</td>
-          <td>${car.yearOfProduction}</td>
-          <td>${purchaseDate}</td>
-          <td>
-            <button class="btn btn-sm btn-primary me-2 edit-car-btn"
-                    data-bs-toggle="modal" data-bs-target="#carModal"
-                    data-car-id="${car.id}">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-danger delete-car-btn"
-                    data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
-                    data-car-id="${car.id}">
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    tbody.innerHTML = cars.map(car => `
+      <tr data-id="${car.id}">
+        <td>${car.brandName}</td>
+        <td>${car.color}</td>
+        <td>${car.registrationNumber}</td>
+        <td>${car.yearOfProduction}</td>
+        <td>
+          <button class="btn btn-sm btn-primary me-2 edit-car-btn"
+                  data-bs-toggle="modal" data-bs-target="#carModal"
+                  data-car-id="${car.id}">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn btn-sm btn-danger delete-car-btn"
+                  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                  data-car-id="${car.id}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
 
     // Назначаем обработчики кнопок редактирования
     document.querySelectorAll('.edit-car-btn').forEach(btn => {
@@ -528,7 +407,7 @@
     });
   }
 
-  // Открытие модального окна для редактирования автомобиля
+  // Открытие модального окна для редактирования
   async function openEditModal(carId) {
     try {
       const response = await fetch(`/api/vehicles/${carId}`, {
@@ -544,49 +423,11 @@
       // Заполняем форму
       document.getElementById('modalTitle').textContent = 'Редактировать автомобиль';
       document.getElementById('carId').value = car.id;
-      document.getElementById('brand').value = car.brandId;
+      //document.getElementById('brandName').value = car.brandName;
+      document.getElementById('brand').value = car.brandId; // Устанавливаем выбранный бренд
       document.getElementById('color').value = car.color;
       document.getElementById('registrationNumber').value = car.registrationNumber;
       document.getElementById('yearOfProduction').value = car.yearOfProduction;
-
-      // Устанавливаем дату покупки
-      console.log(car);
-      console.log(car.purchaseDateTime);
-      console.log(car.purchaseDateTimeUTC);
-      if (car.purchaseDateTime) {
-        const utcDate = new Date(car.purchaseDateTime);
-        const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
-        document.getElementById('purchaseDate').value = localDate.toISOString().slice(0, 16);
-      }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert(error.message);
-    }
-  }
-
-  // Открытие модального окна для редактирования предприятия
-  async function openEditEnterpriseModal() {
-    if (!selectedEnterpriseId) return;
-
-    try {
-      const response = await fetch(`/api/enterprises/${selectedEnterpriseId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) throw new Error('Ошибка загрузки данных предприятия');
-
-      const enterprise = await response.json();
-
-      // Заполняем форму
-      document.getElementById('enterpriseId').value = enterprise.id;
-      document.getElementById('enterpriseName').value = enterprise.name;
-      document.getElementById('enterpriseCity').value = enterprise.city;
-
-      // Заполняем таймзоны и выбираем текущую
-      populateTimezonesDropdown();
-      document.getElementById('enterpriseTimezone').value = enterprise.timezone || 'UTC';
 
     } catch (error) {
       console.error('Ошибка:', error);
@@ -603,16 +444,8 @@
 
     const brandSelect = document.getElementById('brand');
     if (!brandSelect.value) {
-      alert('Выберите марку автомобиля');
-      return;
-    }
-
-    // Преобразуем локальную дату в UTC
-    const localDate = document.getElementById('purchaseDate').value;
-    let purchaseDateTime = null;
-    if (localDate) {
-      const date = new Date(localDate);
-      purchaseDateTime = date.toISOString();
+        alert('Выберите марку автомобиля');
+        return;
     }
 
     const carData = {
@@ -620,9 +453,10 @@
       brandId: brandSelect.value,
       color: document.getElementById('color').value,
       registrationNumber: document.getElementById('registrationNumber').value,
-      yearOfProduction: document.getElementById('yearOfProduction').value,
-      purchaseDateTime: purchaseDateTime
+      yearOfProduction: document.getElementById('yearOfProduction').value
     };
+
+    console.log(carData)
 
     const carId = document.getElementById('carId').value;
     const url = carId ? `/api/vehicles/${carId}` : `/api/vehicles`;
@@ -654,38 +488,6 @@
     }
   }
 
-  // Сохранение предприятия
-  async function saveEnterprise() {
-    const enterpriseData = {
-      id: document.getElementById('enterpriseId').value,
-      name: document.getElementById('enterpriseName').value,
-      city: document.getElementById('enterpriseCity').value,
-      timezone: document.getElementById('enterpriseTimezone').value
-    };
-
-    try {
-      const response = await fetch(`/api/enterprises/${enterpriseData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(enterpriseData)
-      });
-
-      if (!response.ok) throw new Error('Ошибка сохранения предприятия');
-
-      // Закрываем модальное окно
-      enterpriseModal.hide();
-
-      // Обновляем список предприятий
-      fetchEnterprises();
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert(error.message);
-    }
-  }
-
   // Удаление автомобиля
   async function deleteCar() {
     if (!currentCarId) return;
@@ -700,8 +502,11 @@
 
       if (!response.ok) {
         const errorData = await response.json();
+        // Теперь errorData содержит объект с ошибкой
         console.log(errorData.message);
+        // Выводим сообщение на экран
         alert(errorData.message);
+        //throw new Error('Ошибка удаления');
       }
 
       // Закрываем модальное окно
@@ -718,15 +523,14 @@
     }
   }
 
-  // Обработчик открытия модального окна для добавления автомобиля
+  // Обработчик открытия модального окна для добавления
   document.getElementById('carModal').addEventListener('show.bs.modal', function(event) {
     const button = event.relatedTarget;
     if (button.getAttribute('data-mode') === 'add') {
       document.getElementById('modalTitle').textContent = 'Добавить автомобиль';
       document.getElementById('carForm').reset();
       document.getElementById('carId').value = '';
-      document.getElementById('brand').value = '';
-      document.getElementById('purchaseDate').value = new Date().toISOString().slice(0, 16);
+      document.getElementById('brand').value = ''; // Сбрасываем выбор бренда
     }
   });
 </script>

@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -90,6 +91,7 @@ public class VehicleService {
         vehicle.setPrice(Double.parseDouble(values.getOrDefault("price", vehicle.getPrice()).toString()));
         vehicle.setRegistrationNumber((String) values.getOrDefault("registrationNumber", vehicle.getRegistrationNumber()));
         vehicle.setYearOfProduction(Integer.parseInt(values.getOrDefault("yearOfProduction", vehicle.getYearOfProduction()).toString()));
+        vehicle.setPurchaseDateTime(Instant.parse(values.getOrDefault("purchaseDateTime", vehicle.getPurchaseDateTime()).toString()));
 
         repo.save(vehicle);
         repo.flush();

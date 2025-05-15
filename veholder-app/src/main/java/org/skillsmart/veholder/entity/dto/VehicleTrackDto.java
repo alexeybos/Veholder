@@ -2,21 +2,42 @@ package org.skillsmart.veholder.entity.dto;
 
 import org.skillsmart.veholder.entity.VehicleTrack;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class VehicleTrackDto {
-    //private Long id;
+    private Long id;
     private Long vehicleId;
-    private Double longitude;
-    private Double latitude;
+    private Double lon;
+    private Double lat;
     private ZonedDateTime recordedAt;
+    private String recordedEnterpriseZone;
 
     public VehicleTrackDto(VehicleTrack track) {
-        //this.id = track.getId();
+        this.id = track.getId();
         this.vehicleId = track.getVehicleId();
-        this.longitude = track.getPoint().getX();
-        this.latitude = track.getPoint().getY();
+        this.lon = track.getPoint().getX();
+        this.lat = track.getPoint().getY();
         this.recordedAt = track.getRecordedAt();
+        this.recordedEnterpriseZone = "";
+    }
+
+    public VehicleTrackDto(VehicleTrack track, ZoneId targetZone) {
+        this.id = track.getId();
+        this.vehicleId = track.getVehicleId();
+        this.lon = track.getPoint().getX();
+        this.lat = track.getPoint().getY();
+        this.recordedAt = track.getRecordedAt();
+        this.recordedEnterpriseZone = track.getRecordedAt().withZoneSameInstant(targetZone).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getVehicleId() {
@@ -27,20 +48,20 @@ public class VehicleTrackDto {
         this.vehicleId = vehicleId;
     }
 
-    public Double getLongitude() {
-        return longitude;
+    public Double getLon() {
+        return lon;
     }
 
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
+    public void setLon(Double lon) {
+        this.lon = lon;
     }
 
-    public Double getLatitude() {
-        return latitude;
+    public Double getLat() {
+        return lat;
     }
 
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
+    public void setLat(Double lat) {
+        this.lat = lat;
     }
 
     public ZonedDateTime getRecordedAt() {
@@ -49,5 +70,13 @@ public class VehicleTrackDto {
 
     public void setRecordedAt(ZonedDateTime recordedAt) {
         this.recordedAt = recordedAt;
+    }
+
+    public String getRecordedEnterpriseZone() {
+        return recordedEnterpriseZone;
+    }
+
+    public void setRecordedEnterpriseZone(String recordedEnterpriseZone) {
+        this.recordedEnterpriseZone = recordedEnterpriseZone;
     }
 }

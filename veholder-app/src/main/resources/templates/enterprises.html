@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
   <meta charset="UTF-8">
   <title>Предприятия</title>
@@ -234,19 +234,42 @@
     document.getElementById('editEnterpriseBtn').addEventListener('click', openEditEnterpriseModal);
   });
 
+  function getTimezonesWithOffsets() {
+    const timezones = Intl.supportedValuesOf('timeZone').sort();
+    const now = new Date();
+
+    return timezones.map(zone => {
+      try {
+        const offset = Intl.DateTimeFormat('en', {
+          timeZone: zone,
+          timeZoneName: 'shortOffset'
+        }).formatToParts(now)
+          .find(part => part.type === 'timeZoneName').value;
+
+        return {
+          id: zone,
+          display: `${zone} (${offset})`
+        };
+      } catch (e) {
+        return {
+          id: zone,
+          display: zone
+        };
+      }
+    });
+  }
+
   // Загрузка списка таймзон
   async function fetchTimezones() {
     try {
-      timezonesList = Intl.supportedValuesOf('timeZone').sort();
+      //timezonesList = Intl.supportedValuesOf('timeZone').sort();
+      timezonesList = getTimezonesWithOffsets();
     } catch (error) {
       console.error('Ошибка загрузки списка таймзон:', error);
       // Fallback список таймзон
       timezonesList = [
-        'Europe/Moscow',
-        'Europe/London',
-        'America/New_York',
-        'Asia/Tokyo',
-        'UTC'
+        {id: 'Europe/Moscow', display: 'Europe/Moscow (GMT+3)'},
+        {id: 'UTC', display: 'UTC (GMT+0)'}
       ];
     }
   }
@@ -288,10 +311,17 @@
     const timezoneSelect = document.getElementById('enterpriseTimezone');
     timezoneSelect.innerHTML = '';
 
+    //timezonesList.forEach(zone => {
+    //  const option = document.createElement('option');
+    //  option.value = zone;
+    //  option.textContent = zone;
+    //  timezoneSelect.appendChild(option);
+    //});
+
     timezonesList.forEach(zone => {
       const option = document.createElement('option');
-      option.value = zone;
-      option.textContent = zone;
+      option.value = zone.id;  // Сохраняем ZoneId в value
+      option.textContent = zone.display;  // Показываем с смещением
       timezoneSelect.appendChild(option);
     });
   }
@@ -520,8 +550,11 @@
       document.getElementById('yearOfProduction').value = car.yearOfProduction;
 
       // Устанавливаем дату покупки
-      if (car.purchaseDateTimeUTC) {
-        const utcDate = new Date(car.purchaseDateTimeUTC);
+      console.log(car);
+      console.log(car.purchaseDateTime);
+      console.log(car.purchaseDateTimeUTC);
+      if (car.purchaseDateTime) {
+        const utcDate = new Date(car.purchaseDateTime);
         const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
         document.getElementById('purchaseDate').value = localDate.toISOString().slice(0, 16);
       }

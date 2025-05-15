@@ -79,6 +79,10 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-spatial</artifactId>
+		</dependency>
 
 		<!-- Bootstrap (optional) -->
 		<dependency>

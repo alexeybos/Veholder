@@ -6,4 +6,5 @@ public record EnterpriseDto(
         String city,
         String directorName,
         String timezone
+        //,String timezoneFullName
 ) {}

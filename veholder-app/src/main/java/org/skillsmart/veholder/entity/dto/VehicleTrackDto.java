@@ -23,6 +23,15 @@ public class VehicleTrackDto {
         this.recordedEnterpriseZone = "";
     }
 
+    public VehicleTrackDto(Long vehicleId, Double lon, Double lat, ZonedDateTime recordedAt) {
+        this.id = null;
+        this.vehicleId = vehicleId;
+        this.lon = lon;
+        this.lat = lat;
+        this.recordedAt = recordedAt;
+        this.recordedEnterpriseZone = "";
+    }
+
     public VehicleTrackDto(VehicleTrack track, ZoneId targetZone) {
         this.id = track.getId();
         this.vehicleId = track.getVehicleId();

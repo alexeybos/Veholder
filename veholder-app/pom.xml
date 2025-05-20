@@ -97,7 +97,11 @@
 			<artifactId>font-awesome</artifactId>
 			<version>6.0.0</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-60</artifactId>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

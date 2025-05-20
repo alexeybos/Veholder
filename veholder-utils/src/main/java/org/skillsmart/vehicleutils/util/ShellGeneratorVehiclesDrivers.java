@@ -6,6 +6,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,22 +28,6 @@ public class ShellGeneratorVehiclesDrivers {
         return "Hello, world!";
     }
 
-    /*@ShellMethod(key = "test", value = "Return list of Enterprises from REST")
-    public String test(String username, String pass) {
-        restClient.getToken("man1", "1111")
-                .then(Mono.just("Auth completed")).block(Duration.ofSeconds(2));
-        return restClient.getEnterprises().block(Duration.ofSeconds(2));
-    }
-
-    @ShellMethod(key = "brands", value = "Return list of Brands from DB")
-    public List<Brand> brands() {
-        return generator.getBrands();
-    }*/
-
-    //@ShellMethod
-
-    //@ShellMethod(key = "generate", value = "Generate for enterprise {enterpriseId} vehicles {vehicleCount} and drivers {driverCount}")
-    //public String generate(Long enterpriseId, int vehicleCount, int driverCount) {
     @ShellMethod(key = "generate", value = "Generate for enterprise {enterpriseId} vehicles {vehicleCount} with drivers")
     public void generate(
             @ShellOption(
@@ -64,7 +49,6 @@ public class ShellGeneratorVehiclesDrivers {
         restClient.getToken(username, pass)
                 .then(Mono.just("Auth completed")).block(Duration.ofSeconds(5));
         List<Map<String, Object>> brands = restClient.getBrands().block(Duration.ofSeconds(5));
-        //int driverCount = generateVehiclesAndDrivers(enterpriseId, vehicleCount, brands);
         String[] enterpriseIdsArr = enterpriseIds.split(",");
         List<Long> enterpriseIdsList = new ArrayList<>();
         for (String s : enterpriseIdsArr) {
@@ -76,37 +60,49 @@ public class ShellGeneratorVehiclesDrivers {
                         System.out.println("Generation complete. For Enterprise [" + aLong + "] Generated " + vehicleCount + " vehicles and " + driverCount + " active drivers");
                     });
         }
-
-        //return "Generation complete. Generated " + vehicleCount + " vehicles and " + driverCount + "drivers";
     }
 
-    /*private int generateVehiclesAndDrivers(Long enterpriseId, int vehicleCnt, List<Map<String, Object>> brands) {
-        //minValue + (int) (Math.random() * (maxValue - minValue + 1))
-        int driverCnt = 0;
-        for (int i = 0; i < vehicleCnt; i++) {
-            VehicleDTO vehicle = new VehicleDTO();
-            vehicle.setBrandId((Long) brands.get((int) (Math.random() * (brands.size()))).get("id"));
-            vehicle.setRegistrationNumber(generateNumber());
-            vehicle.setPrice(20000 + (Math.random() * (25000000 - 20000)));
-            vehicle.setMileage(100 + (int) (Math.random() * (200000 - 100)));
-            vehicle.setInOrder(true);
-            vehicle.setColor(getColor());
-            vehicle.setEnterpriseId(enterpriseId);
-            vehicle.setYearOfProduction(1955 + (int) (Math.random() * (2025 - 1955 + 1)));
-            //System.out.println(vehicle);
-            if (i % 3 == 0) {
-                DriverDto driverDto = new DriverDto();
-                driverDto.setVehicleId(1L);
-                driverDto.setBirthDate(generateDate());
-                driverDto.setActive(true);
-                driverDto.setName(getName());
-                driverDto.setSalary(20000 + (Math.random() * (250000 - 20000)));
-                driverDto.setEnterpriseId(enterpriseId);
-                driverCnt++;
-                System.out.println(driverDto);
-            }
-        }
-        return driverCnt;
-    }*/
+    @ShellMethod(key = "track", value = "Generate for vehicle {vehicleId} track in real time")
+    public void generateTrackForVehicle(
+            @ShellOption(
+                    value = {"-u", "--user"},
+                    help = "Имя менеджера (обязательно)"
+            ) String username,
+            @ShellOption(
+                    value = {"-p", "--pass"},
+                    help = "Пароль (обязательно)"
+            ) String pass,
+            @ShellOption(
+                    value = {"-v", "--vehicle"},
+                    help = "Идентификатор автомобиля(обязательно)"
+            ) Long vehicleId,
+            @ShellOption(
+                    value = {"-o", "--longitude"},
+                    help = "долгота стартовой точки"
+            ) Double lon,
+            @ShellOption(
+                    value = {"-a", "--latitude"},
+                    help = "широта стартовой точки"
+            ) Double lat,
+            @ShellOption(
+                    value = {"-r", "--radius"},
+                    help = "радиус (км) в котором  будет генерироваться трек"
+            ) Integer radius,
+            @ShellOption(
+                    value = {"-l", "--length"},
+                    help = "длина трека (км)"
+            ) Integer length,
+            @ShellOption(
+                    value = {"-s", "--speed"},
+                    help = "средняя скорость движения автомобиля (км/ч)"
+            ) Integer speed) throws IOException {
+        restClient.getToken(username, pass)
+                .then(Mono.just("Auth completed")).block(Duration.ofSeconds(5));
+
+        restClient.generateVehicleTrack(vehicleId, lon, lat, radius, speed, length)
+                .subscribe(packsCnt -> {
+                    System.out.println("Generation complete. For vehicleId [" + vehicleId + "] Generated " + packsCnt + " geo points");
+                });
+    }
 
 }

@@ -68,10 +68,24 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-spatial</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-60</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.skillsmart</groupId>
 			<artifactId>veholder-app</artifactId>
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
+		</dependency>
+		<!-- HTTP-клиент -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
 		</dependency>
 
 		<!-- Если утилиты используют общие классы из основного приложения -->

@@ -58,6 +58,10 @@ public class VehicleTrackService {
         return new GeoJsonFeatureCollection(features);
     }
 
+    public void createTrack(List<VehicleTrack> points) {
+        repo.saveAll(points);
+    }
+
     // Внутренние классы для GeoJSON
     private static class GeoJsonFeatureCollection {
         private final String type = "FeatureCollection";

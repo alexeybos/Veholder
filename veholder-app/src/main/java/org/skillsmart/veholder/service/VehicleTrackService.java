@@ -5,6 +5,10 @@ import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.VehicleTrack;
 import org.skillsmart.veholder.entity.dto.VehicleTrackDto;
 import org.skillsmart.veholder.repository.VehicleTrackRepository;
+import org.skillsmart.veholder.utils.GeoJsonFeature;
+import org.skillsmart.veholder.utils.GeoJsonFeatureCollection;
+import org.skillsmart.veholder.utils.GeoJsonGeometry;
+import org.skillsmart.veholder.utils.GeoJsonPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -62,72 +66,4 @@ public class VehicleTrackService {
         repo.saveAll(points);
     }
 
-    // Внутренние классы для GeoJSON
-    private static class GeoJsonFeatureCollection {
-        private final String type = "FeatureCollection";
-        private final List<GeoJsonFeature> features;
-
-        public GeoJsonFeatureCollection(List<GeoJsonFeature> features) {
-            this.features = features;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public List<GeoJsonFeature> getFeatures() {
-            return features;
-        }
-    }
-
-    private static class GeoJsonFeature {
-        private final String type = "Feature";
-        private final String id;
-        private final GeoJsonGeometry geometry;
-        private final Map<String, Object> properties;
-
-        public GeoJsonFeature(String id, GeoJsonGeometry geometry, Map<String, Object> properties) {
-            this.id = id;
-            this.geometry = geometry;
-            this.properties = properties;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public GeoJsonGeometry getGeometry() {
-            return geometry;
-        }
-
-        public Map<String, Object> getProperties() {
-            return properties;
-        }
-    }
-
-    private interface GeoJsonGeometry {
-        String getType();
-    }
-
-    private static class GeoJsonPoint implements GeoJsonGeometry {
-        private final String type = "Point";
-        private final double[] coordinates;
-
-        public GeoJsonPoint(double longitude, double latitude) {
-            this.coordinates = new double[]{longitude, latitude};
-        }
-
-        @Override
-        public String getType() {
-            return this.type;
-        }
-
-        public double[] getCoordinates() {
-            return coordinates;
-        }
-    }
 }

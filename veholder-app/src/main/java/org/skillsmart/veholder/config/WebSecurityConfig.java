@@ -103,6 +103,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/admin/login").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/error").permitAll() // Разрешаем доступ к /error
+                        .requestMatchers("/api/tracks/**").permitAll()
                         //.requestMatchers("/enterprises").permitAll() // Разрешаем доступ к /error
                         .requestMatchers(
                                 "/",

@@ -62,7 +62,7 @@ public class GraphHopperTrackGenerator {
         for (String point : points) {
             url.append("&point=").append(point);
         }
-
+        System.out.println("[DEBUG] url = " + url.toString());
         return url.toString();
     }
 

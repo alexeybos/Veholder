@@ -24,4 +24,21 @@ public class TripRestController {
         if ("geojson".equalsIgnoreCase(format)) return ResponseEntity.ok(rawList.getFirst());
         return ResponseEntity.ok(rawList);
     }
+
+    @GetMapping("/only/{vehicleId}")
+    public ResponseEntity<?> getVehicleTrips(@PathVariable Long vehicleId,
+                                                  @RequestParam ZonedDateTime start,
+                                                  @RequestParam ZonedDateTime end,
+                                                  @RequestParam(defaultValue = "json") String format) {
+        List<?> rawList = service.findTripsWithinInterval(vehicleId, start, end);
+        return ResponseEntity.ok(rawList);
+    }
+
+    @GetMapping("/info/{vehicleId}")
+    public ResponseEntity<?> getVehicleTripsInfo(@PathVariable Long vehicleId,
+                                             @RequestParam ZonedDateTime start,
+                                             @RequestParam ZonedDateTime end) throws Exception {
+        List<?> rawList = service.getTripsInfo(vehicleId, start, end);
+        return ResponseEntity.ok(rawList);
+    }
 }

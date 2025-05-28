@@ -40,6 +40,16 @@ public class VehicleTrackRestController {
         return ResponseEntity.ok(rawList);
     }
 
+    @GetMapping("/only/{vehicleId}")
+    public ResponseEntity<?> getVehicleTrackModel(@PathVariable Long vehicleId,
+                                             @RequestParam ZonedDateTime start,
+                                             @RequestParam ZonedDateTime end,
+                                             @RequestParam(defaultValue = "json") String format) {
+        List<?> rawList = service.findVehicleTrackInInterval(vehicleId, start, end, format);
+        if ("geojson".equalsIgnoreCase(format)) return ResponseEntity.ok(rawList.getFirst());
+        return ResponseEntity.ok(rawList);
+    }
+
     @PostMapping("/{vehicleId}")
     public ResponseEntity<?> createPoints(@RequestBody List<VehicleTrack> points) {
         try {

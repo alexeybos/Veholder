@@ -263,7 +263,7 @@
               <input type="datetime-local" class="form-control" id="endDate">
             </div>
             <div class="col-md-2 d-flex align-items-end">
-              <button type="button" class="btn btn-primary w-100" id="applyFilterBtn">Применить</button>
+              <button type="button" class="btn btn-primary w-100" id="applyFilterBtn">></button>
             </div>
           </div>
         </form>
@@ -274,7 +274,7 @@
               <th></th>
               <th>Начало</th>
               <th>Конец</th>
-              <th>Пробег (км)</th>
+              <th>Старт</th>
             </tr>
             </thead>
             <tbody id="tripsTableBody">
@@ -728,13 +728,13 @@
     tbody.innerHTML = trips.map(trip => {
       const startDate = new Date(trip.tripStart);
       const endDate = new Date(trip.tripEnd);
-
+      //<td>${trip.mileage ? trip.mileage.toFixed(2) : 'Н/Д'}</td>
       return `
         <tr class="trip-row" data-start="${trip.tripStart}" data-end="${trip.tripEnd}">
           <td><input type="checkbox" class="trip-checkbox" data-start="${trip.tripStart}" data-end="${trip.tripEnd}"></td>
           <td>${startDate.toLocaleString()}</td>
           <td>${endDate.toLocaleString()}</td>
-          <td>${trip.mileage ? trip.mileage.toFixed(2) : 'Н/Д'}</td>
+          <td>${trip.startPointDesc}</td>
         </tr>
       `;
     }).join('');

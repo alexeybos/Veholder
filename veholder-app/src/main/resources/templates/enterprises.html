@@ -252,37 +252,41 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="tripsFilterForm" class="mb-3 p-3 border-bottom">
-          <div class="row">
-            <div class="col-md-5">
-              <label for="startDate" class="form-label">Начало периода</label>
-              <input type="datetime-local" class="form-control" id="startDate">
-            </div>
-            <div class="col-md-5">
-              <label for="endDate" class="form-label">Конец периода</label>
-              <input type="datetime-local" class="form-control" id="endDate">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button type="button" class="btn btn-primary w-100" id="applyFilterBtn">></button>
-            </div>
+        <div class="col-md-6">
+          <div>
+            <form id="tripsFilterForm" class="mb-3 p-3 border-bottom">
+              <div class="row">
+                <div class="col-md-5">
+                  <label for="startDate" class="form-label">Начало периода</label>
+                  <input type="datetime-local" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-5">
+                  <label for="endDate" class="form-label">Конец периода</label>
+                  <input type="datetime-local" class="form-control" id="endDate">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="button" class="btn btn-primary w-100" id="applyFilterBtn">></button>
+                </div>
+              </div>
+            </form>
           </div>
-        </form>
-        <div id="tripsListContainer">
-          <table class="table table-striped">
-            <thead>
-            <tr>
-              <th></th>
-              <th>Начало</th>
-              <th>Конец</th>
-              <th>Старт</th>
-            </tr>
-            </thead>
-            <tbody id="tripsTableBody">
-            <!-- Список поездок будет заполнен через JS -->
-            </tbody>
-          </table>
+          <div id="tripsListContainer" class="w-100">
+            <table class="table table-striped">
+              <thead>
+              <tr>
+                <th></th>
+                <th>Начало</th>
+                <th>Конец</th>
+                <th>Старт</th>
+              </tr>
+              </thead>
+              <tbody id="tripsTableBody">
+              <!-- Список поездок будет заполнен через JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div id="mapContainer">
+        <div id="mapContainer" class="col-md-6">
           <div id="map"></div>
         </div>
       </div>

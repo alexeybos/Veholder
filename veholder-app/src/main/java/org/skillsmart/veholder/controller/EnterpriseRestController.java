@@ -53,6 +53,14 @@ public class EnterpriseRestController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping(value = "/{id}/export")
+    public ResponseEntity<JsonNode> exportEnterpriseById(@PathVariable Long id,
+                                                         @RequestParam(defaultValue = "json") String format) {
+        JsonNode enterprise = service.getFullEnterpriseInfoById(id);
+        if (enterprise != null) return ResponseEntity.ok(enterprise);
+        return ResponseEntity.notFound().build();
+    }
+
     /*@GetMapping(value = "/{id}/drivers")
     public ResponseEntity<EnterprisesDriversDto> getDriversFromEnterpriseById(@PathVariable Long id) {
         //Enterprise enterprise = service.getEnterpriseById(id);

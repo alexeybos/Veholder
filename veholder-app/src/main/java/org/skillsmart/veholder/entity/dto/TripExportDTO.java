@@ -15,11 +15,23 @@ import java.time.ZonedDateTime;
 public class TripExportDTO {
     private Long id;
     private Long vehicleId;
-    private Range<ZonedDateTime> timeInterval;
+    private ZonedDateTime tripStart;
+    private ZonedDateTime tripEnd;
+//    private String startPointDesc;
+//    private String endPointDesc;
+    private Double startLon;
+    private Double startLat;
+    private Double endLon;
+    private Double endLat;
 
-    public TripExportDTO(Trip trip) {
+    public TripExportDTO(Trip trip, Double startLon, Double startLat, Double endLon, Double endLat) {
         this.id = trip.getId();
         this.vehicleId = trip.getVehicle().getId();
-        this.timeInterval = trip.getTimeInterval();
+        this.tripStart = trip.getTimeInterval().lower();
+        this.tripEnd = trip.getTimeInterval().upper();
+        this.startLon = startLon;
+        this.startLat = startLat;
+        this.endLon = endLon;
+        this.endLat = endLat;
     }
 }

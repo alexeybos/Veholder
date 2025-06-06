@@ -4,6 +4,8 @@ import com.vladmihalcea.hibernate.type.range.Range;
 import org.skillsmart.veholder.entity.Trip;
 import org.skillsmart.veholder.entity.dto.TripDTO;
 import org.skillsmart.veholder.entity.dto.TripDatesDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -29,6 +31,13 @@ public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificat
     List<TripDatesDTO> findTripsNative(@Param("vehicleId") Long vehicleId,
                                        @Param("startDate") ZonedDateTime startDate,
                                        @Param("endDate") ZonedDateTime endDate);
+
+    @Query(value = "SELECT id, vehicle_id, lower(time_interval), upper(time_interval) FROM trips WHERE vehicle_id = :vehicleId AND recorded_at && tstzrange(:startDate, :endDate)",
+            nativeQuery = true)
+    Page<TripDatesDTO> findTripsNativePage(@Param("vehicleId") Long vehicleId,
+                                       @Param("startDate") ZonedDateTime startDate,
+                                       @Param("endDate") ZonedDateTime endDate,
+                                       Pageable pageable);
 
     /*@Query("SELECT new org.skillsmart.veholder.entity.dto.TripDTO(t.id, t.vehicleId, t.recordedAt) " +
             "FROM Trip t " +

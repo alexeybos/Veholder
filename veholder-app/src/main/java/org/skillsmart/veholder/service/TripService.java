@@ -78,7 +78,6 @@ public class TripService {
     public List<TripDescriptionDTO> getTripsInfo(Long vehicleId, ZonedDateTime start, ZonedDateTime end) throws Exception {
         List<Trip> trips = findTripsWithinInterval(vehicleId, start, end);
         List<TripDescriptionDTO> tripsInfo = new ArrayList<>();
-        //FIXME Дата не в таймзоне предприятия
         ZoneId enterpriseZone = timezoneService.getEnterpriseTimeZoneByVehicle(vehicleId);
         for (Trip trip : trips) {
             List<VehicleTrack> points = trackService.getStartAndEndPointByInterval(vehicleId,

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/export")
@@ -35,10 +36,6 @@ public class ExportRestController {
     @Autowired
     @Qualifier("exportTripJob")
     private Job exportTripJob;
-
-    /*@Autowired
-    @Qualifier("importEnterpriseJob")
-    private Job importEnterpriseJob;*/
 
     @GetMapping("/enterprise")
     public String exportEnterprises() throws Exception {
@@ -71,15 +68,17 @@ public class ExportRestController {
 
         try {
             String outputFile =
-                    String.format("trips_vehicle_%d_%s_%s.csv",
+                    String.format("trips_vehicle_%d_%s_%s.%s",
                             vehicleId,
-                            startDate != null ? startDate : "all",
-                            endDate != null ? endDate : "all");
+                            startDate != null ? startDate.toString() : "all",
+                            endDate != null ? endDate.toString() : "all",
+                            Objects.equals(format, "json") ? "json" : "csv");
 
             JobParametersBuilder jobParametersBuilder = new JobParametersBuilder()
                     .addLong("vehicleId", vehicleId)
                     .addString("outputFile", outputFile)
-                    .addLong("startAt", System.currentTimeMillis());
+                    .addLong("startAt", System.currentTimeMillis())
+                    .addString("format", format);
 
             if (startDate != null) {
                 jobParametersBuilder.addJobParameter("startDate", startDate, ZonedDateTime.class);

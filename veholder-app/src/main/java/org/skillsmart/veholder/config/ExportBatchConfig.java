@@ -1,8 +1,13 @@
 package org.skillsmart.veholder.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.dto.TripDatesDTO;
+import org.skillsmart.veholder.entity.dto.TripExportDTO;
+import org.skillsmart.veholder.entity.processor.TripToExportDTOProcessor;
 import org.skillsmart.veholder.repository.EnterpriseRepository;
 import org.skillsmart.veholder.repository.TripRepository;
 import org.skillsmart.veholder.repository.VehiclePagingRepository;
@@ -12,9 +17,14 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
+import org.springframework.batch.item.json.JsonFileItemWriter;
+import org.springframework.batch.item.json.builder.JsonFileItemWriterBuilder;
+import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -128,8 +138,6 @@ public class ExportBatchConfig {
             @Value("#{jobParameters['startDate']}") ZonedDateTime startDate,
             @Value("#{jobParameters['endDate']}") ZonedDateTime endDate) {
 
-
-
         RepositoryItemReader<TripDatesDTO> reader = new RepositoryItemReader<>();
         reader.setRepository(repository);
         reader.setMethodName("findTripsNativePage");
@@ -140,28 +148,70 @@ public class ExportBatchConfig {
     }
 
     @Bean
+    public ItemProcessor<TripDatesDTO, TripExportDTO> tripProcessor() {
+        return new TripToExportDTOProcessor();
+    }
+
+    @Bean
     @StepScope
-    public FlatFileItemWriter<TripDatesDTO> tripExportWriter(
+    public FlatFileItemWriter<TripExportDTO> tripExportWriter(
             @Value("#{jobParameters['outputFile']}") String outputFile) {
 
-        return new FlatFileItemWriterBuilder<TripDatesDTO>()
+        return new FlatFileItemWriterBuilder<TripExportDTO>()
                 .name("tripExportWriter")
                 .resource(new FileSystemResource(outputFile))
                 .delimited()
                 .delimiter(",")
-                .names("id", "vehicleId", "startInterval", "startInterval")
+                .names("id", "vehicleId", "startInterval", "endInterval")
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public CompositeItemWriter<TripExportDTO> tripWriter(
+            @Value("#{jobParameters['outputFile']}") String outputFile,
+            @Value("#{jobParameters['format']}") String format) {
+
+        CompositeItemWriter<TripExportDTO> writer = new CompositeItemWriter<>();
+
+        if ("csv".equalsIgnoreCase(format)) {
+            writer.setDelegates(List.of(tripExportWriter(outputFile)));
+        } else if ("json".equalsIgnoreCase(format)) {
+            writer.setDelegates(List.of(tripJsonWriter(outputFile)));
+        } else {
+            writer.setDelegates(List.of(tripExportWriter(outputFile)));
+        }
+
+        return writer;
+    }
+
+    @Bean
+    @StepScope
+    public JsonFileItemWriter<TripExportDTO> tripJsonWriter(
+            @Value("#{jobParameters['outputFile']}") String outputFile
+    ) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        return new JsonFileItemWriterBuilder<TripExportDTO>()
+                .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>(objectMapper))
+                .resource(new FileSystemResource(outputFile))
+                .name("tripJsonWriter")
                 .build();
     }
 
     @Bean
     public Step exportTripStep(JobRepository jobRepository,
                                PlatformTransactionManager transactionManager,
+                               ItemProcessor<TripDatesDTO, TripExportDTO> tripProcessor,
                                RepositoryItemReader<TripDatesDTO> tripExportReader,
-                               FlatFileItemWriter<TripDatesDTO> tripExportWriter) {
+                               CompositeItemWriter<TripExportDTO> tripWriter) {
         return new StepBuilder("exportTripStep", jobRepository)
-                .<TripDatesDTO, TripDatesDTO>chunk(10, transactionManager)
+                .<TripDatesDTO, TripExportDTO>chunk(10, transactionManager)
                 .reader(tripExportReader)
-                .writer(tripExportWriter)
+                .processor(tripProcessor)
+                .writer(tripWriter)
                 .build();
     }
 

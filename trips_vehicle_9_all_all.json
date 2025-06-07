@@ -1,0 +1,4 @@
+[
+ {"id":4,"vehicleId":9,"tripStart":"2025-05-19T09:30:19.946Z","tripEnd":"2025-05-19T09:43:20.946Z","startLon":53.224976,"startLat":50.198461,"endLon":53.192205,"endLat":50.133892},
+ {"id":5,"vehicleId":9,"tripStart":"2025-05-26T11:30:29.642Z","tripEnd":"2025-05-26T15:17:09.642Z","startLon":55.761103,"startLat":37.620306,"endLon":56.152704,"endLat":40.367259}
+]

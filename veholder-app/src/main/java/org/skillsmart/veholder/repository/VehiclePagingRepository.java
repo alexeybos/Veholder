@@ -42,4 +42,5 @@ public interface VehiclePagingRepository extends PagingAndSortingRepository<Vehi
     )
     Page<VehicleDTO> getVehiclesByEnterprise(Pageable pageable, Long enterpriseId, String manager);
 
+    Page<Vehicle> findByEnterpriseId(Long enterpriseId, Pageable pageable);
 }

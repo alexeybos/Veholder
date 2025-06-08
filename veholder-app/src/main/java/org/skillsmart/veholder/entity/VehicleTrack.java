@@ -1,5 +1,6 @@
 package org.skillsmart.veholder.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.*;
@@ -21,6 +22,7 @@ public class VehicleTrack {
     private Point point;
 
     @Column(name = "recorded_at", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]X", timezone = "UTC")
     private ZonedDateTime recordedAt;
 
     public Long getId() {

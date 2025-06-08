@@ -1,5 +1,6 @@
 package org.skillsmart.veholder.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -20,6 +21,7 @@ public class Vehicle {
     private String registrationNumber;
     private boolean inOrder;
     @Column(name = "purchase_utc")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]X", timezone = "UTC")
     private Instant purchaseDateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)

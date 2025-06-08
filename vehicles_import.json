@@ -1,0 +1,62 @@
+[
+  {
+    "purchaseDateTime": "2015-05-04T20:47:14.538918Z",
+    "registrationNumber": "T015XP065",
+    "yearOfProduction": 2024,
+    "price": 1.9469253511356793E7,
+    "color": "Белый",
+    "mileage": 24714,
+    "inOrder": true,
+    "brand": {
+      "id": 3
+    },
+    "enterprise": {
+      "id": 13544444
+    }
+  },
+  {
+    "purchaseDateTime": "2016-05-04T20:47:14.538918Z",
+    "registrationNumber": "T016KP01",
+    "yearOfProduction": 2021,
+    "price": 1.0E7,
+    "color": "Черный",
+    "mileage": 10000,
+    "inOrder": true,
+    "brand": {
+      "id": 2
+    },
+    "enterprise": {
+      "id": 13
+    }
+  },
+  {
+    "purchaseDateTime": "2017-05-04T20:47:14.538918Z",
+    "registrationNumber": "K017TP163",
+    "yearOfProduction": 2020,
+    "price": 0.0,
+    "color": "Серый",
+    "mileage": 0,
+    "inOrder": false,
+    "brand": {
+      "id": 2
+    },
+    "enterprise": {
+      "id": 13544444
+    }
+  },
+  {
+    "purchaseDateTime": "2018-05-04T20:47:14.538918Z",
+    "registrationNumber": "O018AA718",
+    "yearOfProduction": 2020,
+    "price": 3500250.0,
+    "color": "Красный",
+    "mileage": 9999,
+    "inOrder": true,
+    "brand": {
+      "id": 1
+    },
+    "enterprise": {
+      "id": 13
+    }
+  }
+]

@@ -3,10 +3,14 @@ package org.skillsmart.veholder.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.skillsmart.veholder.component.TripImportWriter;
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.skillsmart.veholder.entity.dto.TripExportDTO;
+import org.skillsmart.veholder.entity.dto.TripImportResult;
 import org.skillsmart.veholder.processor.EnterpriseItemProcessor;
+import org.skillsmart.veholder.processor.TripImportProcessor;
 import org.skillsmart.veholder.processor.VehicleItemProcessor;
 import org.skillsmart.veholder.repository.BrandRepository;
 import org.skillsmart.veholder.repository.EnterpriseRepository;
@@ -179,4 +183,45 @@ public class ImportBatchConfig {
     //        .build();
     //}
 
+    @Bean
+    @StepScope
+    public FlatFileItemReader<TripExportDTO> tripImportReader(
+            @Value("#{jobParameters['inputFile']}") String inputFile) {
+
+        return new FlatFileItemReaderBuilder<TripExportDTO>()
+                .name("tripImportReader")
+                .resource(new FileSystemResource(inputFile))
+                .delimited()
+                .delimiter(",")
+                .names(new String[]{
+                        "vehicleId", "tripStart", "tripEnd", "startLon", "startLat", "endLon", "endLat"
+                })
+                .fieldSetMapper(new TripDescriptionFieldSetMapper()) // Используем наш маппер
+                /*.fieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
+                    setTargetType(TripExportDTO.class);
+                }})*/
+                .build();
+    }
+
+    @Bean
+    public Step importTripStep(JobRepository jobRepository,
+                               PlatformTransactionManager transactionManager,
+                               FlatFileItemReader<TripExportDTO> tripImportReader,
+                               TripImportProcessor tripImportProcessor,
+                               TripImportWriter tripImportWriter) {
+        return new StepBuilder("importTripStep", jobRepository)
+                .<TripExportDTO, TripImportResult>chunk(10, transactionManager)
+                .reader(tripImportReader)
+                .processor(tripImportProcessor)
+                .writer(tripImportWriter)
+                .build();
+    }
+
+    @Bean
+    public Job importTripJob(JobRepository jobRepository,
+                             Step importTripStep) {
+        return new JobBuilder("importTripJob", jobRepository)
+                .start(importTripStep)
+                .build();
+    }
 }

@@ -98,6 +98,23 @@ public class ExportRestController {
         }
     }
 
+    @GetMapping("/enterprise/full/{id}")
+    public String exportEnterpriseFull(@PathVariable Long id) throws Exception {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("startAt", System.currentTimeMillis())
+                .toJobParameters();
+        jobLauncher.run(exportEnterpriseJob, jobParameters);
+
+        JobParameters vehicleJobParameters = new JobParametersBuilder()
+                .addLong("enterpriseId", id)
+                .addString("outputFile", "vehicles_enterprise_" + id + "_export.csv")
+                .addLong("startAt", System.currentTimeMillis())
+                .toJobParameters();
+        jobLauncher.run(exportVehicleJob, vehicleJobParameters);
+
+        return "Full enterprise export started! Started enterprise -> vehicles -> brands -> trips export jobs.";
+    }
+
     /*private final ExportService exportService;
 
     @PostMapping("/enterprise/{enterpriseId}")

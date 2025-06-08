@@ -23,6 +23,10 @@ public class ImportRestController {
     @Qualifier("importVehicleJob")
     private Job importVehicleJob;
 
+    @Autowired
+    @Qualifier("importTripJob")
+    private Job importTripJob;
+
     @GetMapping("/enterprise")
     public String importEnterprises() throws Exception {
         JobParameters jobParameters = new JobParametersBuilder()
@@ -39,6 +43,17 @@ public class ImportRestController {
                 .addString("format", format)
                 .toJobParameters();
         jobLauncher.run(importVehicleJob, jobParameters);
+        return "Import job started!";
+    }
+
+    @GetMapping("/trip")
+    public String importTrips(@RequestParam(defaultValue = "csv") String format) throws Exception {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("startAt", System.currentTimeMillis())
+                .addString("format", format)
+                .addString("inputFile", "trip_import.csv")
+                .toJobParameters();
+        jobLauncher.run(importTripJob, jobParameters);
         return "Import job started!";
     }
 

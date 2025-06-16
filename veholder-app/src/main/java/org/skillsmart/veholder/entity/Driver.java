@@ -1,6 +1,7 @@
 package org.skillsmart.veholder.entity;
 
 import jakarta.persistence.*;
+import org.skillsmart.veholder.utils.GUIDWorker;
 
 
 import java.time.LocalDate;
@@ -28,6 +29,19 @@ public class Driver {
 
     @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean isActive;
+
+    public Driver() {}
+
+    public Driver(Long id, Driver driver) {
+        this.id = id;
+        this.name = driver.getName();
+        this.birthDate = driver.getBirthDate();
+        this.salary = driver.getSalary();
+        //this.enterprise = new Enterprise(GUIDWorker.getGUID(driver.getEnterprise().getId()), driver.getEnterprise());
+        this.enterprise = driver.getEnterprise();
+        this.vehicle = driver.getVehicle();
+        this.isActive = driver.isActive();
+    }
 
     public Long getId() {
         return id;
@@ -78,6 +92,10 @@ public class Driver {
     }
 
     public boolean isActive() {
+        return isActive;
+    }
+
+    public boolean getIsActive() {
         return isActive;
     }
 

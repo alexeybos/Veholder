@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-//@Table(name = "managers")
-//@AttributeOverride(name = "username", column = @Column(name = "username", nullable = false, unique = true))
 public class Manager extends User {
 
     @Id

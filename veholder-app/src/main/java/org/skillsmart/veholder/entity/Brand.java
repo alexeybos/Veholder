@@ -27,6 +27,15 @@ public class Brand {
         this.id = id;
     }
 
+    public Brand(Long id, Brand brand) {
+        this.id = id;
+        this.name = brand.getName();
+        this.type = brand.getType();
+        this.loadCapacity = brand.getLoadCapacity();
+        this.tank = brand.getTank();
+        this.numberOfSeats = brand.getNumberOfSeats();
+    }
+
     public Long getId() {
         return id;
     }

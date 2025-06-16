@@ -1,52 +1,7 @@
 [
   {
     "purchaseDateTime": "2015-05-04T20:47:14.538918Z",
-    "registrationNumber": "T015XP065",
-    "yearOfProduction": 2024,
-    "price": 1.9469253511356793E7,
-    "color": "Белый",
-    "mileage": 24714,
-    "inOrder": true,
-    "brand": {
-      "id": 3
-    },
-    "enterprise": {
-      "id": 13544444
-    }
-  },
-  {
-    "purchaseDateTime": "2016-05-04T20:47:14.538918Z",
-    "registrationNumber": "T016KP01",
-    "yearOfProduction": 2021,
-    "price": 1.0E7,
-    "color": "Черный",
-    "mileage": 10000,
-    "inOrder": true,
-    "brand": {
-      "id": 2
-    },
-    "enterprise": {
-      "id": 13
-    }
-  },
-  {
-    "purchaseDateTime": "2017-05-04T20:47:14.538918Z",
-    "registrationNumber": "K017TP163",
-    "yearOfProduction": 2020,
-    "price": 0.0,
-    "color": "Серый",
-    "mileage": 0,
-    "inOrder": false,
-    "brand": {
-      "id": 2
-    },
-    "enterprise": {
-      "id": 13544444
-    }
-  },
-  {
-    "purchaseDateTime": "2018-05-04T20:47:14.538918Z",
-    "registrationNumber": "O018AA718",
+    "registrationNumber": "O777AA763",
     "yearOfProduction": 2020,
     "price": 3500250.0,
     "color": "Красный",
@@ -56,7 +11,67 @@
       "id": 1
     },
     "enterprise": {
-      "id": 13
+      "id": 14
+    }
+  },
+  {
+    "purchaseDateTime": "2016-09-24T22:34:12.625Z",
+    "registrationNumber": "T345KP01",
+    "yearOfProduction": 2021,
+    "price": 1.0E7,
+    "color": "Черный",
+    "mileage": 10000,
+    "inOrder": true,
+    "brand": {
+      "id": 2
+    },
+    "enterprise": {
+      "id": 14
+    }
+  },
+  {
+    "purchaseDateTime": "2017-05-19T19:32:29.626Z",
+    "registrationNumber": "A111AA111",
+    "yearOfProduction": 2020,
+    "price": 2000000.0,
+    "color": "Красный",
+    "mileage": 100001,
+    "inOrder": true,
+    "brand": {
+      "id": 10000000000000006
+    },
+    "enterprise": {
+      "id": 14
+    }
+  },
+  {
+    "purchaseDateTime": "2013-03-14T01:15:01.398273Z",
+    "registrationNumber": "M702KE103",
+    "yearOfProduction": 2004,
+    "price": 1.4023600023937058E7,
+    "color": "Синий",
+    "mileage": 40063,
+    "inOrder": true,
+    "brand": {
+      "id": 0
+    },
+    "enterprise": {
+      "id": 14
+    }
+  },
+  {
+    "purchaseDateTime": "2013-03-14T01:15:01.398273Z",
+    "registrationNumber": "K300TP163",
+    "yearOfProduction": 2020,
+    "price": 0.0,
+    "color": "Серый",
+    "mileage": 0,
+    "inOrder": false,
+    "brand": {
+      "id": 2
+    },
+    "enterprise": {
+      "id": 14
     }
   }
 ]

@@ -19,4 +19,6 @@ public interface DriverPagingRepository extends PagingAndSortingRepository<Drive
             nativeQuery = true
     )
     Page<DriverNoDateDto> getDriversDTOByManager(Pageable pageable, String username);
+
+    Page<Driver> findByEnterpriseId(Long enterpriseId, Pageable pageable);
 }

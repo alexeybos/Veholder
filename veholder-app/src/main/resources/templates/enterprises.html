@@ -106,6 +106,9 @@
                   data-bs-target="#enterpriseModal" disabled>
             <i class="fas fa-edit"></i> Редактировать предприятие
           </button>
+          <button id="reportsBtn" class="btn btn-sm btn-info" disabled>
+            <i class="fas fa-file-alt"></i> Отчеты
+          </button>
         </div>
         <div class="d-flex justify-content-between mb-3">
           <div class="pagination-info me-3" id="paginationInfo">
@@ -297,11 +300,123 @@
   </div>
 </div>
 
+<!-- Модальное окно для выбора отчета -->
+<div class="modal fade" id="reportsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Формирование отчета</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="reportForm">
+          <input type="hidden" id="reportEnterpriseId">
+          <input type="hidden" id="reportCarId">
+          <div class="mb-3">
+            <label for="reportType" class="form-label">Тип отчета</label>
+            <select class="form-select" id="reportType" required>
+              <option value="" selected disabled>Выберите отчет</option>
+              <!-- Список отчетов будет заполнен через JS -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="periodType" class="form-label">Тип периода</label>
+            <select class="form-select" id="periodType" required>
+              <option value="DAY">День</option>
+              <option value="MONTH">Месяц</option>
+              <option value="YEAR">Год</option>
+            </select>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="reportStartDate" class="form-label">Дата начала</label>
+              <input type="date" class="form-control" id="reportStartDate" required>
+            </div>
+            <div class="col-md-6">
+              <label for="reportEndDate" class="form-label">Дата окончания</label>
+              <input type="date" class="form-control" id="reportEndDate" required>
+            </div>
+          </div>
+          <div id="additionalParamsContainer">
+            <!-- Дополнительные параметры будут добавлены динамически -->
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="generateReportBtn">Сформировать отчет</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для отображения результатов отчета -->
+<div class="modal fade" id="reportResultModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportResultTitle">Результаты отчета</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped" id="reportResultTable">
+            <thead>
+            <tr>
+              <th>Период</th>
+              <th>Пробег (км)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Данные отчета будут заполнены через JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для отображения результатов отчета по зарплате водителя -->
+<div class="modal fade" id="driverReportResultModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="driverReportResultTitle">Результаты отчета</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped" id="driverReportResultTable">
+            <thead>
+            <tr>
+              <th>Период</th>
+              <th>Кол-во часов</th>
+              <th>Зарплата (руб)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Данные отчета будут заполнены через JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Добавляем Leaflet JS для карты -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   let selectedEnterpriseId = null;
+  let selectedCarId = null;
   let selectedEnterpriseTimezone = null;
   let brandsList = [];
   let timezonesList = [];
@@ -584,7 +699,7 @@
       }
 
       return `
-        <tr data-id="${car.id}" class="clickable-row">
+        <tr class="clickable-row car-row" data-id="${car.id}">
           <td>${car.brandName}</td>
           <td>${car.color}</td>
           <td>${car.registrationNumber}</td>
@@ -629,6 +744,27 @@
         const carId = this.getAttribute('data-id');
         const registrationNumber = this.cells[2].textContent;
         openTripsModal(carId, registrationNumber);
+      });
+    });
+
+    // Назначаем обработчики строк предприятий
+    document.querySelectorAll('.car-row').forEach(row => {
+      row.addEventListener('click', function() {
+        // Убираем выделение у всех строк
+        document.querySelectorAll('.car-row').forEach(r => {
+          r.classList.remove('table-primary');
+        });
+
+        // Выделяем текущую строку
+        this.classList.add('table-primary');
+
+        // Запоминаем выбранное авто
+        selectedCarId = this.getAttribute('data-id');
+
+        // Активируем кнопку редактирования предприятия
+        //document.getElementById('editEnterpriseBtn').disabled = false;
+        document.getElementById('reportsBtn').disabled = false;
+
       });
     });
   }
@@ -1059,6 +1195,237 @@
       document.getElementById('purchaseDate').value = new Date().toISOString().slice(0, 16);
     }
   });
+
+let reportsList = [];
+const reportsModal = new bootstrap.Modal(document.getElementById('reportsModal'));
+const reportResultModal = new bootstrap.Modal(document.getElementById('reportResultModal'));
+const driverReportResultModal = new bootstrap.Modal(document.getElementById('driverReportResultModal'));
+
+// Активировать кнопку отчетов при выборе автомобиля
+document.querySelectorAll('#carsTableBody tr.clickable-row').forEach(row => {
+  row.addEventListener('click', function() {
+    document.getElementById('reportsBtn').disabled = false;
+  });
+});
+
+// Обработчик кнопки "Отчеты"
+document.getElementById('reportsBtn').addEventListener('click', function() {
+  if (!selectedEnterpriseId) {
+    alert('Выберите предприятие');
+    return;
+  }
+
+  const selectedRow = document.querySelector('#carsTableBody tr.table-primary');
+  if (!selectedRow) {
+    alert('Выберите автомобиль');
+    return;
+  }
+
+  openReportsModal(selectedEnterpriseId, selectedRow.getAttribute('data-id'));
+});
+
+// Открытие модального окна отчетов
+async function openReportsModal(enterpriseId, carId) {
+  document.getElementById('reportEnterpriseId').value = enterpriseId;
+  document.getElementById('reportCarId').value = carId;
+
+  // Установка дат по умолчанию (текущий месяц)
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  document.getElementById('reportStartDate').value = formatDate(firstDay);
+  document.getElementById('reportEndDate').value = formatDate(lastDay);
+
+  // Загрузка списка отчетов
+  await fetchReportsList();
+
+  reportsModal.show();
+}
+
+// Форматирование даты для input[type=date]
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Загрузка списка отчетов
+async function fetchReportsList() {
+  try {
+    const response = await fetch('/api/reports', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) throw new Error('Ошибка загрузки списка отчетов');
+
+    reportsList = await response.json();
+    populateReportsDropdown();
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert(error.message);
+  }
+}
+
+// Заполнение выпадающего списка отчетов
+function populateReportsDropdown() {
+  const reportSelect = document.getElementById('reportType');
+  reportSelect.innerHTML = '<option value="" selected disabled>Выберите отчет</option>';
+
+  reportsList.forEach(report => {
+    const option = document.createElement('option');
+    option.value = report.id;
+    option.textContent = report.name;
+    reportSelect.appendChild(option);
+  });
+}
+
+// Обработчик изменения выбранного отчета
+document.getElementById('reportType').addEventListener('change', function() {
+  const reportId = this.value;
+  const report = reportsList.find(r => r.id == reportId);
+
+  // Очищаем контейнер дополнительных параметров
+  const paramsContainer = document.getElementById('additionalParamsContainer');
+  paramsContainer.innerHTML = '';
+
+  // Добавляем поля для дополнительных параметров
+  if (report && report.parameters) {
+    report.parameters.forEach(param => {
+      const div = document.createElement('div');
+      div.className = 'mb-3';
+      div.innerHTML = `
+        <label for="param_${param}" class="form-label">${param}</label>
+        <input type="text" class="form-control" id="param_${param}" required>
+      `;
+      paramsContainer.appendChild(div);
+    });
+  }
+});
+
+// Обработчик кнопки "Сформировать отчет"
+document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+
+// Генерация отчета
+async function generateReport() {
+  const reportId = document.getElementById('reportType').value;
+  const enterpriseId = document.getElementById('reportEnterpriseId').value;
+  const carId = document.getElementById('reportCarId').value;
+  const periodType = document.getElementById('periodType').value;
+  const startDate = document.getElementById('reportStartDate').value;
+  const endDate = document.getElementById('reportEndDate').value;
+
+  if (!reportId || !enterpriseId || !carId || !startDate || !endDate) {
+    alert('Заполните все обязательные поля');
+    return;
+  }
+
+  // Собираем дополнительные параметры
+  const additionalParams = {};
+  const report = reportsList.find(r => r.id == reportId);
+
+  if (report && report.parameters) {
+    report.parameters.forEach(param => {
+      const paramValue = document.getElementById(`param_${param}`).value;
+      if (paramValue) {
+        additionalParams[param] = paramValue;
+      }
+    });
+  }
+
+  // Формируем URL с параметрами
+  const params = new URLSearchParams();
+  params.append('enterpriseId', enterpriseId);
+  params.append('carId', carId);
+  params.append('periodType', periodType);
+  params.append('startDate', startDate);
+  params.append('endDate', endDate);
+
+  // Добавляем дополнительные параметры
+  Object.entries(additionalParams).forEach(([key, value]) => {
+    params.append(key, value);
+  });
+
+  try {
+    const response = await fetch(`/api/reports/${reportId}?${params.toString()}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) throw new Error('Ошибка формирования отчета');
+
+    const reportData = await response.json();
+    console.log(reportData)
+    showReportResult(reportData, reportId);
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert(error.message);
+  }
+}
+
+// Отображение результатов отчета
+function showReportResult(reportData, reportId) {
+  const report = reportsList.find(r => r.id == reportId);
+  if (report.name == 'Отчет по пробегу для A111AA111') {
+      document.getElementById('reportResultTitle').textContent = `Результаты отчета: ${report ? report.name : ''}`;
+      console.log('In modal')
+      const tbody = document.querySelector('#reportResultTable tbody');
+      tbody.innerHTML = '';
+
+      if (reportData.results && Object.keys(reportData.results).length > 0) {
+        // Есть данные для отображения
+        Object.entries(reportData.results).forEach(([period, value]) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${period}</td>
+            <td>${value}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } else {
+        // Нет данных
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="2" class="text-center">Нет данных для отображения</td>';
+        tbody.appendChild(row);
+      }
+
+      reportsModal.hide();
+      reportResultModal.show();
+  } else {
+      document.getElementById('driverReportResultTitle').textContent = `Результаты отчета: ${report ? report.name : ''}`;
+      console.log('In modal2')
+      const tbody = document.querySelector('#driverReportResultTable tbody');
+      tbody.innerHTML = '';
+
+      if (reportData.results && Object.keys(reportData.results).length > 0) {
+        // Есть данные для отображения
+        Object.entries(reportData.results).forEach(([period, value]) => {
+          const row = document.createElement('tr');
+          const parsedValue = JSON.parse(value);
+          console.log(parsedValue);
+          row.innerHTML = `
+            <td>${period}</td>
+            <td>${parsedValue.total_hours}</td>
+            <td>${parsedValue.salary}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } else {
+        // Нет данных
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="2" class="text-center">Нет данных для отображения</td>';
+        tbody.appendChild(row);
+      }
+
+      reportsModal.hide();
+      driverReportResultModal.show();
+  }
+
+}
 </script>
 </body>
 </html>

@@ -64,6 +64,15 @@ public class Enterprise {
         this.id = id;
     }
 
+    public Enterprise(Long id, Enterprise enterprise) {
+        this.id = id;
+        this.name = enterprise.getName();
+        this.city = enterprise.getCity();
+        this.directorName = enterprise.getDirectorName();
+        this.timezone = enterprise.getTimezone();
+        this.managers = enterprise.getManagers();
+    }
+
     public Long getId() {
         return id;
     }

@@ -37,6 +37,15 @@ public class ExportRestController {
     @Qualifier("exportTripJob")
     private Job exportTripJob;
 
+    @Autowired
+    @Qualifier("vehicleAndBrandExportJob")
+    private Job vehicleAndBrandExportJob;
+
+    @Autowired
+    @Qualifier("exportDriverJob")
+    private Job exportDriverJob;
+
+
     @GetMapping("/enterprise")
     public String exportEnterprises() throws Exception {
         JobParameters jobParameters = new JobParametersBuilder()
@@ -110,9 +119,16 @@ public class ExportRestController {
                 .addString("outputFile", "vehicles_enterprise_" + id + "_export.csv")
                 .addLong("startAt", System.currentTimeMillis())
                 .toJobParameters();
-        jobLauncher.run(exportVehicleJob, vehicleJobParameters);
+        jobLauncher.run(vehicleAndBrandExportJob, vehicleJobParameters);
 
-        return "Full enterprise export started! Started enterprise -> vehicles -> brands -> trips export jobs.";
+        JobParameters driverJobParameters = new JobParametersBuilder()
+                .addLong("enterpriseId", id)
+                .addLong("startAt", System.currentTimeMillis())
+                .toJobParameters();
+        jobLauncher.run(exportDriverJob, driverJobParameters);
+        //exportDriverJob
+
+        return "Full enterprise export started! Started enterprise -> drivers -> vehicles -> brands -> trips export jobs.";
     }
 
     /*private final ExportService exportService;

@@ -33,6 +33,22 @@ public class Vehicle {
     @JoinColumn(name = "enterprise_id")
     private Enterprise enterprise;
 
+    public Vehicle() {
+    }
+
+    public Vehicle(Long id, Vehicle vehicle) {
+        this.id = id;
+        this.yearOfProduction = vehicle.getYearOfProduction();
+        this.price = vehicle.getPrice();
+        this.color = vehicle.getColor();
+        this.mileage = vehicle.getMileage();
+        this.registrationNumber = vehicle.getRegistrationNumber();
+        this.inOrder = vehicle.isInOrder();
+        this.purchaseDateTime = vehicle.getPurchaseDateTime();
+        this.brand = vehicle.getBrand();
+        this.enterprise = vehicle.getEnterprise();
+    }
+
     public Long getId() {
         return id;
     }
@@ -111,6 +127,10 @@ public class Vehicle {
 
     public void setPurchaseDateTime(Instant purchaseDateTime) {
         this.purchaseDateTime = purchaseDateTime;
+    }
+
+    public void setPurchaseDateTime(String dateTimeStr) {
+        this.purchaseDateTime = Instant.parse(dateTimeStr);
     }
 
     @Override

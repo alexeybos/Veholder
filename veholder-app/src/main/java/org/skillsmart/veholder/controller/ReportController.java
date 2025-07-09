@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -16,8 +17,13 @@ public class ReportController {
     @Autowired
     private ReportService reportService;
 
-    @GetMapping
+    /*@GetMapping
     public List<Report> getAllReports() {
+        return reportService.getAllReports();
+    }*/
+
+    @GetMapping
+    public List<Map<String, Object>> getAllReports() {
         return reportService.getAllReports();
     }
 

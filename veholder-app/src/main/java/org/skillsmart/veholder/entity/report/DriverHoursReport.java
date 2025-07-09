@@ -3,6 +3,7 @@ package org.skillsmart.veholder.entity.report;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import org.skillsmart.veholder.entity.Vehicle;
 
 @Entity
@@ -20,4 +21,11 @@ public class DriverHoursReport extends Report{
     public void setTotalHours(Double totalHours) {
         this.totalHours = totalHours;
     }
+
+    @Transient
+    public static final String reportTypeName = "Отчет по водителю";
+    @Transient
+    public static final String reportTypeId = "DRIVER_HOURS";
+
+
 }

@@ -337,6 +337,20 @@
               <input type="date" class="form-control" id="reportEndDate" required>
             </div>
           </div>
+          <div class="mb-3">
+            <label for="reportEnterprises" class="form-label">Предприятие</label>
+            <select class="form-select" id="reportEnterprises" required>
+              <option value="" selected disabled>Выберите предприятие</option>
+              <!-- Список предприятий будет заполнен через JS -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="reportVehicles" class="form-label">Автомобиль</label>
+            <select class="form-select" id="reportVehicles" required>
+              <option value="" selected disabled>Выберите автомобиль</option>
+              <!-- Список автомобилей будет заполнен через JS -->
+            </select>
+          </div>
           <div id="additionalParamsContainer">
             <!-- Дополнительные параметры будут добавлены динамически -->
           </div>
@@ -432,6 +446,8 @@
   let currentVehicleTrips = [];
   let selectedTrips = [];
   let tripLayers = {};
+  let fetchedEnterprises = null;
+  let fetchedVehicles = null;
 
   // Загружаем данные при открытии страницы
   document.addEventListener('DOMContentLoaded', () => {
@@ -572,6 +588,7 @@
       }
 
       const enterprises = await response.json();
+      fetchedEnterprises = enterprises;
       renderEnterprisesTable(enterprises);
     } catch (error) {
       console.error('Ошибка:', error);
@@ -650,6 +667,7 @@
       totalCars = responseData.totalItems;
       const cars = responseData.vehicles || responseData;
       renderCarsTable(cars);
+      fetchedVehicles = cars;
       updatePaginationControls();
       updatePaginationInfo(cars.length, totalCars);
     } catch (error) {
@@ -1283,6 +1301,32 @@ function populateReportsDropdown() {
   });
 }
 
+// Заполнение выпадающего списка предприятий
+function populateReportsEnterprisesDropdown() {
+  const enterpriseSelect = document.getElementById('reportEnterprises');
+  enterpriseSelect.innerHTML = '<option value="" selected disabled>Выберите предприятие</option>';
+
+  fetchedEnterprises.forEach(enterprise => {
+    const option = document.createElement('option');
+    option.value = enterprise.id;
+    option.textContent = enterprise.name;
+    enterpriseSelect.appendChild(option);
+  });
+}
+
+// Заполнение выпадающего списка автомобилей
+function populateReportsVehiclesDropdown() {
+  const carSelect = document.getElementById('reportVehicles');
+  carSelect.innerHTML = '<option value="" selected disabled>Выберите автомобиль</option>';
+
+  fetchedVehicles.forEach(car => {
+    const option = document.createElement('option');
+    option.value = car.id;
+    option.textContent = car.registrationNumber;
+    carSelect.appendChild(option);
+  });
+}
+
 // Обработчик изменения выбранного отчета
 document.getElementById('reportType').addEventListener('change', function() {
   const reportId = this.value;
@@ -1291,6 +1335,9 @@ document.getElementById('reportType').addEventListener('change', function() {
   // Очищаем контейнер дополнительных параметров
   const paramsContainer = document.getElementById('additionalParamsContainer');
   paramsContainer.innerHTML = '';
+
+  populateReportsEnterprisesDropdown();
+  populateReportsVehiclesDropdown();
 
   // Добавляем поля для дополнительных параметров
   if (report && report.parameters) {
@@ -1311,7 +1358,7 @@ document.getElementById('generateReportBtn').addEventListener('click', generateR
 
 // Генерация отчета
 async function generateReport() {
-  const reportId = document.getElementById('reportType').value;
+  const reportId = 4; //document.getElementById('reportType').value;
   const enterpriseId = document.getElementById('reportEnterpriseId').value;
   const carId = document.getElementById('reportCarId').value;
   const periodType = document.getElementById('periodType').value;
@@ -1369,10 +1416,9 @@ async function generateReport() {
 
 // Отображение результатов отчета
 function showReportResult(reportData, reportId) {
-  const report = reportsList.find(r => r.id == reportId);
+  const report = reportData; //reportsList.find(r => r.id == reportId);
   if (report.name == 'Отчет по пробегу для A111AA111') {
       document.getElementById('reportResultTitle').textContent = `Результаты отчета: ${report ? report.name : ''}`;
-      console.log('In modal')
       const tbody = document.querySelector('#reportResultTable tbody');
       tbody.innerHTML = '';
 

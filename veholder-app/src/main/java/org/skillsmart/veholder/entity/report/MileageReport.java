@@ -3,6 +3,7 @@ package org.skillsmart.veholder.entity.report;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import org.skillsmart.veholder.entity.Vehicle;
 
 @Entity
@@ -21,5 +22,16 @@ public class MileageReport extends Report {
         this.totalMileage = total;
     }
 
-    // Дополнительные специфичные поля и методы
+    @Transient
+    public static final String reportTypeName = "Отчет по пробегу";
+    @Transient
+    public static final String reportTypeId = "MILEAGE";
+
+    public String getReportTypeId() {
+        return reportTypeId;
+    }
+
+    public String getReportTypeName() {
+        return reportTypeName;
+    }
 }

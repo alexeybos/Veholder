@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.*;
+
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -24,6 +27,15 @@ public class VehicleTrack {
     @Column(name = "recorded_at", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]X", timezone = "UTC")
     private ZonedDateTime recordedAt;
+
+    public VehicleTrack() {
+    }
+
+    public VehicleTrack(Long vehicleId, Point point, Instant recordedAt) {
+        this.vehicleId = vehicleId;
+        this.point = point;
+        this.recordedAt = recordedAt.atZone(ZoneOffset.UTC);
+    }
 
     public Long getId() {
         return id;

@@ -1,5 +1,6 @@
 package org.skillsmart.veholder.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -12,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -76,6 +79,35 @@ public class VehicleTrackRestController {
             service.createTrack(Collections.singletonList(trackPoint));
             return ResponseEntity.ok().build();
         } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "error", "Access Denied",
+                    "message", e.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
+        }
+    }
+
+    @PostMapping("/{vehicleId}/track/load")
+    public ResponseEntity<?> uploadTrack(
+            @PathVariable Long vehicleId,
+            @RequestParam("file") MultipartFile file) {
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("File is empty");
+        }
+
+        /*if (!file.getOriginalFilename().toLowerCase().endsWith(".gpx")) {
+            return ResponseEntity.badRequest().body("Only GPX files are allowed");
+        }*/
+
+        try {
+            service.uploadTrack(vehicleId, file);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body("Failed to process GPX file");
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
                     "error", "Access Denied",
                     "message", e.getMessage(),

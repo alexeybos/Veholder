@@ -22,24 +22,6 @@ public class GraphHopperTrackGenerator {
     private static final String API_KEY = "d577df8a-16d5-41c2-b096-daf659aaf6e8";
     private static final String GH_API_URL = "https://graphhopper.com/api/1/route";
 
-    /*public static void main(String[] args) throws IOException {
-        // Задаем точки маршрута (старт, промежуточные, финиш)
-        List<String> points = List.of(
-                "52.520008,13.404954", // Берлин, Бранденбургские ворота
-                "52.5185,13.4081",     // Промежуточная точка
-                "52.5135,13.4152"      // Конечная точка
-        );
-
-        // Генерируем трек
-        List<TrackPoint> track = generateTrack(points, 10); // 10 сек между точками
-
-        // Сохраняем в файлы
-        saveToCsv(track, "track.csv");
-        saveToGpx(track, "track.gpx");
-
-        System.out.println("Трек успешно сгенерирован!");
-    }*/
-
     public static List<TrackPoint> generateTrack(List<String> points, int intervalSeconds) throws IOException {
         // Формируем URL запроса к GraphHopper API
         String url = buildApiUrl(points);

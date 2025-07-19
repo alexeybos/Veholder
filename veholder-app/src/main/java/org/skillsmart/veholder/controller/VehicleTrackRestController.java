@@ -86,8 +86,7 @@ public class VehicleTrackRestController {
             ));
         }
     }
-    //api/tracks/${carId}/track/load
-    // api/tracks
+
     @PostMapping("/{vehicleId}/track/load")
     public ResponseEntity<?> uploadTrack(
             @PathVariable Long vehicleId,
@@ -108,6 +107,12 @@ public class VehicleTrackRestController {
             return ResponseEntity.notFound().build();
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body("Failed to process GPX file");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "error", "Access Denied",
+                    "message", e.getMessage(),
+                    "timestamp", LocalDateTime.now()
+            ));
         }
     }
 }

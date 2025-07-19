@@ -174,8 +174,19 @@ public class VehicleTrackService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
 
-        List<VehicleTrack> tracks = parseGpxFile(vehicle, file.getInputStream());
-        repo.saveAll(tracks);
+        // Парсим файл и получаем временной диапазон
+        GpxTrackInfo trackInfo = parseGpxFile(file.getInputStream());
+
+        // Проверяем пересечения с существующими треками
+        checkForDateOverlaps(vehicleId, trackInfo.getStartDate(), trackInfo.getEndDate());
+
+        // Сохраняем только если нет пересечений
+        repo.saveAll(trackInfo.getTracks().stream()
+                .map(t -> new VehicleTrack(vehicle.getId(), t.getPoint(), t.getRecordedAt().toInstant()))
+                .collect(Collectors.toList()));
+
+        //List<VehicleTrack> tracks = parseGpxFile(vehicle, file.getInputStream());
+        //repo.saveAll(tracks);
     }
 
     private List<VehicleTrack> parseGpxFile(Vehicle vehicle, InputStream inputStream) throws IOException {
@@ -224,8 +235,11 @@ public class VehicleTrackService {
         List<Object[]> existingRanges = repo.findDateRangeByVehicle(vehicleId);
 
         for (Object[] range : existingRanges) {
-            Instant existingStart = (Instant) range[0];
-            Instant existingEnd = (Instant) range[1];
+            //Instant existingStart = (Instant) range[0];
+            //Instant existingEnd = (Instant) range[1];
+
+            Instant existingStart = ((ZonedDateTime) range[0]).toInstant();
+            Instant existingEnd = ((ZonedDateTime) range[1]).toInstant();
 
             if (isDateRangesOverlap(newStart, newEnd, existingStart, existingEnd)) {
                 throw new IllegalStateException("Новый трек пересекается по времени с существующим треком " +

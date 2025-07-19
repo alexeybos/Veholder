@@ -21,13 +21,13 @@ public interface VehicleTrackRepository extends JpaRepository<VehicleTrack, Long
             @Param("start") ZonedDateTime start,
             @Param("end") ZonedDateTime end);
 
-    @Query("SELECT COUNT(t) > 0 FROM VehicleTrack t WHERE t.vehicle.id = :vehicleId " +
+    @Query("SELECT COUNT(t) > 0 FROM VehicleTrack t WHERE t.vehicleId = :vehicleId " +
             "AND t.recordedAt BETWEEN :startDate AND :endDate")
     boolean existsByVehicleAndDateRange(
             @Param("vehicleId") Long vehicleId,
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate);
 
-    @Query("SELECT MIN(t.recordedAt), MAX(t.recordedAt) FROM VehicleTrack t WHERE t.vehicle.id = :vehicleId")
+    @Query("SELECT MIN(t.recordedAt), MAX(t.recordedAt) FROM VehicleTrack t WHERE t.vehicleId = :vehicleId")
     List<Object[]> findDateRangeByVehicle(@Param("vehicleId") Long vehicleId);
 }

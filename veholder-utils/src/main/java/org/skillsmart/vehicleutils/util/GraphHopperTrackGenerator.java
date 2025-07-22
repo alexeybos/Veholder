@@ -2,6 +2,8 @@ package org.skillsmart.vehicleutils.util;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -9,9 +11,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.skillsmart.vehicleutils.util.entity.TrackPoint;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -22,7 +31,8 @@ public class GraphHopperTrackGenerator {
     private static final String API_KEY = "d577df8a-16d5-41c2-b096-daf659aaf6e8";
     private static final String GH_API_URL = "https://graphhopper.com/api/1/route";
 
-    public static List<TrackPoint> generateTrack(List<String> points, int intervalSeconds) throws IOException {
+    public static List<TrackPoint> generateTrack(List<String> points, String startTime, int intervalSeconds)
+            throws IOException, NoSuchAlgorithmException, KeyManagementException {
         // Формируем URL запроса к GraphHopper API
         String url = buildApiUrl(points);
 
@@ -30,7 +40,7 @@ public class GraphHopperTrackGenerator {
         String jsonResponse = sendGetRequest(url);
 
         // Парсим JSON и извлекаем координаты
-        List<TrackPoint> track = parseTrackPoints(jsonResponse, intervalSeconds);
+        List<TrackPoint> track = parseTrackPoints(jsonResponse, startTime, intervalSeconds);
 
         return track;
     }
@@ -48,31 +58,47 @@ public class GraphHopperTrackGenerator {
         return url.toString();
     }
 
-    private static String sendGetRequest(String url) throws IOException {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
+    private static String sendGetRequest(String url) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+        // Создаём "доверяющий всем" SSL-контекст
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+            public X509Certificate[] getAcceptedIssuers() { return null; }
+        }}, new java.security.SecureRandom());
+        //try (CloseableHttpClient client = HttpClients.createDefault()) {
+        try (CloseableHttpClient client = HttpClients.custom()
+                .setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE))
+                .build()) {
             HttpGet request = new HttpGet(url);
             CloseableHttpResponse response = client.execute(request);
             return EntityUtils.toString(response.getEntity());
         }
     }
 
-    private static List<TrackPoint> parseTrackPoints(String json, int intervalSeconds) throws IOException {
+    private static List<TrackPoint> parseTrackPoints(String json, String startTime, int intervalSeconds) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(json);
         JsonNode path = root.path("paths").get(0);
         JsonNode coordinates = path.path("points").path("coordinates");
 
         List<TrackPoint> track = new ArrayList<>();
-        ZonedDateTime startTime = ZonedDateTime.now();
-
+        ZonedDateTime zonedStartDateTime;
+        if (startTime != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            LocalDateTime localDateTime = LocalDateTime.parse(startTime, formatter);
+            // Указываем временную зону (например, UTC)
+            zonedStartDateTime = localDateTime.atZone(ZoneId.of("UTC"));
+        } else {
+            zonedStartDateTime = ZonedDateTime.now();
+        }
         for (int i = 0; i < coordinates.size(); i++) {
             double lon = coordinates.get(i).get(0).asDouble();
             double lat = coordinates.get(i).get(1).asDouble();
-            ZonedDateTime time = startTime.plusSeconds(i * intervalSeconds);
+            ZonedDateTime time = zonedStartDateTime.plusSeconds(i * intervalSeconds);
 
             track.add(new TrackPoint(lat, lon, time));
         }
-
         return track;
     }
 

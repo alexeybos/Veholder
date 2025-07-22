@@ -1,10 +1,6 @@
 package org.skillsmart.vehicleutils.rest.client;
 
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-//import org.skillsmart.vehicleutils.util.GraphHopperTrackGenerator;
-import org.skillsmart.vehicleutils.util.GraphHopperTrackGenerator;
 import org.skillsmart.vehicleutils.util.entity.TrackPoint;
 import org.skillsmart.veholder.entity.VehicleTrack;
 import org.skillsmart.veholder.entity.dto.DriverDto;
@@ -18,8 +14,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -188,10 +187,11 @@ public class RestClient {
         return startDate.plusDays(randomDays);
     }
 
-    public Mono<Integer> generateVehicleTrack(Long vehicleId, double lon, double lat, int radius, int speed, int length) throws IOException {
+    public Mono<Integer> generateVehicleTrack(Long vehicleId, String lon, String lat, String flon,
+                                              String flat, String startTime) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         AtomicInteger pointsCnt = new AtomicInteger(0);
         //сначала непосредственно генерирование массива с треком, потом его передача в post для вставки (возможно пакетами?)
-        List<Map<String, Object>> track = generateTrackByPoints(vehicleId, lon, lat, radius, speed, length);
+        List<Map<String, Object>> track = generateTrackByPoints(vehicleId, lon, lat, flon, flat, startTime);
         //List<VehicleTrack> track = generateTrackByPoints(vehicleId, lon, lat, radius, speed, length);
         final int packSize = 10;
         int packs = track.size() / packSize;
@@ -211,46 +211,73 @@ public class RestClient {
                                     pointsCnt.incrementAndGet();
                                     System.out.println("Generation in progress. Next point (" + i + ") inserted.");
                                 });
-                    }).then(Mono.fromCallable(pointsCnt::get));
+                    }).then(Mono.defer(() -> {
+                        // Получаем даты первой и последней точки
+                        //ZonedDateTime start = (ZonedDateTime) track.getFirst().get("recordedAt");
+                        //ZonedDateTime end = (ZonedDateTime) track.getLast().get("recordedAt");
+
+                        String start = (String) track.getFirst().get("recordedAt");
+                        String end = (String) track.getLast().get("recordedAt");
+
+                        // Выполняем дополнительный вызов
+                        return webClient.post()
+                                .uri(uriBuilder -> uriBuilder.path("api/trips")
+                                        .queryParam("vehicleId", vehicleId)
+                                        .queryParam("start", start)
+                                        .queryParam("end", end)
+                                        .build())
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
+                                .retrieve()
+                                .bodyToMono(Void.class)
+                                .thenReturn(pointsCnt.get());
+                    }));
         });
     }
 
-    private List<Map<String, Object>> generateTrackByPoints(Long vehicleId, double lon, double lat, int radius, int speed, int length) throws IOException {
-    //private List<VehicleTrack> generateTrackByPoints(Long vehicleId, double lon, double lat, int radius, int speed, int length) throws IOException {
+    //return webClient.post()
+    //                                .uri("api/vehicles")
+    //                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
+    //                                .bodyValue(vehicle)
+    //                                .retrieve()
+    //                                .bodyToMono(Long.class)
+    //                                .flatMap(vehicleId -> {
+    //                                    if (i % 10 == 0) {
+    //                                        DriverDto driver = generateDriver(enterpriseId, vehicleId);
+    //                                        return webClient.post()
+    //                                                .uri("api/drivers")
+    //                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
+    //                                                .bodyValue(driver)
+    //                                                .retrieve()
+    //                                                .bodyToMono(Void.class)
+    //                                                .doOnSuccess(v -> driversCnt.incrementAndGet());
+    //                                    } else {
+    //                                        return Mono.empty();
+    //                                    }
+    //                                });
+
+    private List<Map<String, Object>> generateTrackByPoints(Long vehicleId, String lon, String lat, String flon,
+                                                            String flat, String startTime) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         List<Map<String, Object>> result = new ArrayList<>();
-        Point center = geometryFactory.createPoint(new Coordinate(lon, lat));
+        //Point center = geometryFactory.createPoint(new Coordinate(lon, lat));
         //получение точки конца маршрута
-        double[] endPointLatLon = generateRandomPointInRadius(lat, lon, radius);
-        Point endPoint = geometryFactory.createPoint(new Coordinate(endPointLatLon[1], endPointLatLon[0]));
+        //double[] endPointLatLon = generateRandomPointInRadius(lat, lon, radius);
+        //Point endPoint = geometryFactory.createPoint(new Coordinate(endPointLatLon[1], endPointLatLon[0]));
         //логика создания трека
         // Задаем точки маршрута (старт, промежуточные, финиш)
-        List<String> points = List.of(
+        /*List<String> points = List.of(
                 "54.306276,48.353992", // Берлин, Бранденбургские ворота
                 //"52.5185,13.4081",     // Промежуточная точка
                 "53.225695,50.262820"      // Конечная точка
-        );
-        /*List<String> points = List.of(
-                "53.246587,50.215019", // Берлин, Бранденбургские ворота
-                //"52.5185,13.4081",     // Промежуточная точка
-                "53.212922,50.180384"      // Конечная точка
         );*/
-        //53.224967, 50.198440
-        //53.192163, 50.134063
 
+        List<String> points = List.of(
+                lon + "," + lat, //"54.306276,48.353992", // Берлин, Бранденбургские ворота
+                flon + "," + flat      // Конечная точка
+        );
         // Генерируем трек
-        List<TrackPoint> track = generateTrack(points, 10); // 10 сек между точками
+        List<TrackPoint> track = generateTrack(points, startTime,  10); // 10 сек между точками
         System.out.println("[DEBUG] track.size() = " + track.size());
         List<VehicleTrack> adjustedTrack = new ArrayList<>();
-        /*for (TrackPoint value : track) {
-            //result.add("", track.get(i))
-            VehicleTrack trackPoint = new VehicleTrack();
-            Point point = geometryFactory.createPoint(new Coordinate(value.getLon(), value.getLat()));
-            point.setSRID(4326);
-            trackPoint.setPoint(point);
-            trackPoint.setVehicleId(vehicleId);
-            trackPoint.setRecordedAt(value.getTime());
-            adjustedTrack.add(trackPoint);
-        }*/
 
         for (TrackPoint value : track) {
             Map<String, Object> tPoint = new HashMap<>();

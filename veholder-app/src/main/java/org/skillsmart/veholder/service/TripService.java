@@ -1,8 +1,10 @@
 package org.skillsmart.veholder.service;
 
 import com.vladmihalcea.hibernate.type.range.Range;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Expression;
 import org.skillsmart.veholder.entity.Trip;
+import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleTrack;
 import org.skillsmart.veholder.entity.dto.TripDTO;
 import org.skillsmart.veholder.entity.dto.TripDatesDTO;
@@ -35,6 +37,9 @@ public class TripService {
 
     @Autowired
     private VehicleTrackService trackService;
+
+    @Autowired
+    private VehicleService vehicleService;
 
     @Autowired
     private TimezoneService timezoneService;
@@ -94,6 +99,18 @@ public class TripService {
                     YandexGeocoder.getAddressDescByYandex(last.getPoint().getX(), last.getPoint().getY())));
         }
         return tripsInfo;
+    }
+
+    public void createTrip(Long vehicleId, ZonedDateTime start, ZonedDateTime end) {
+        Vehicle vehicle = vehicleService.getVehicleById(vehicleId);
+        if (vehicle == null) {
+            throw new EntityNotFoundException("vehicleId " + vehicleId + " not found");
+        }
+        Range<ZonedDateTime> interval = Range.closed(start, end);
+        Trip trip = new Trip();
+        trip.setVehicle(vehicle);
+        trip.setTimeInterval(interval);
+        repo.save(trip);
     }
 
     //try (Session session = sessionFactory.openSession()) {

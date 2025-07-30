@@ -1,6 +1,8 @@
 package org.skillsmart.vehicleutils.rest.client;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.skillsmart.vehicleutils.util.entity.TrackPoint;
 import org.skillsmart.veholder.entity.VehicleTrack;
 import org.skillsmart.veholder.entity.dto.DriverDto;
@@ -18,7 +20,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -189,7 +192,9 @@ public class RestClient {
 
     public Mono<Integer> generateVehicleTrack(Long vehicleId, String lon, String lat, String flon,
                                               String flat, String startTime) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        AtomicInteger pointsCnt = new AtomicInteger(0);
+        /*AtomicInteger pointsCnt = new AtomicInteger(0);
+        AtomicInteger tracksGenerated = new AtomicInteger(0);
+        int numberOfTracksToGenerate = 5; // Количество треков, которые нужно сгенерировать
         //сначала непосредственно генерирование массива с треком, потом его передача в post для вставки (возможно пакетами?)
         List<Map<String, Object>> track = generateTrackByPoints(vehicleId, lon, lat, flon, flat, startTime);
         //List<VehicleTrack> track = generateTrackByPoints(vehicleId, lon, lat, radius, speed, length);
@@ -213,9 +218,6 @@ public class RestClient {
                                 });
                     }).then(Mono.defer(() -> {
                         // Получаем даты первой и последней точки
-                        //ZonedDateTime start = (ZonedDateTime) track.getFirst().get("recordedAt");
-                        //ZonedDateTime end = (ZonedDateTime) track.getLast().get("recordedAt");
-
                         String start = (String) track.getFirst().get("recordedAt");
                         String end = (String) track.getLast().get("recordedAt");
 
@@ -230,6 +232,84 @@ public class RestClient {
                                 .retrieve()
                                 .bodyToMono(Void.class)
                                 .thenReturn(pointsCnt.get());
+                    }));
+        });*/
+
+        AtomicInteger pointsCnt = new AtomicInteger(0);
+        AtomicInteger tracksGenerated = new AtomicInteger(0);
+        int numberOfTracksToGenerate = 50; // Количество треков, которые нужно сгенерировать
+
+        return Mono.defer(() -> {
+            String authToken = tokenHolder.get();
+            if (authToken == null) return Mono.error(new IllegalStateException("No token. Call getToken() first"));
+            AtomicReference<String> endPointLon = new AtomicReference<>(lon);
+            AtomicReference<String> endPointLat = new AtomicReference<>(lat);
+            AtomicReference<String> realStartTime = new AtomicReference<>(startTime);
+            return Flux.range(0, numberOfTracksToGenerate)
+                    .concatMap(trackNumber -> {
+                        // Генерация трека с уникальными параметрами для каждого трека
+                        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                        LocalDateTime dateTime = LocalDateTime.parse(realStartTime.get(), formatter);
+                        String dateForStartGenerate = dateTime.plusDays(1L).format(formatter);
+
+                        List<Map<String, Object>> track = null;
+                        try {
+                            track = generateTrackByPoints(
+                                    vehicleId,
+                                    //lon + (trackNumber * 0.01),
+                                    //lat + (trackNumber * 0.01),
+                                    endPointLon.get(),
+                                    endPointLat.get(),
+                                    flon,
+                                    flat + (trackNumber * 0.01),
+                                    dateForStartGenerate
+                            );
+                        } catch (IOException | NoSuchAlgorithmException | KeyManagementException | InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        System.out.println("Generating track " + (trackNumber + 1) + " of " + numberOfTracksToGenerate);
+                        endPointLon.set(track.getLast().get("lat").toString());
+                        endPointLat.set(track.getLast().get("lon").toString());
+                        realStartTime.set(dateForStartGenerate);
+
+                        List<Map<String, Object>> finalTrack = track;
+                        return Flux.fromIterable(track)
+                                .concatMap(tPoint -> webClient.post()
+                                        .uri("api/tracks/" + vehicleId + "/point")
+                                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
+                                        .bodyValue(tPoint)
+                                        .retrieve()
+                                        .bodyToMono(Void.class)
+                                        .doOnSuccess(v -> {
+                                            pointsCnt.incrementAndGet();
+                                            System.out.println("Generation in progress. Points inserted: " + pointsCnt.get());
+                                        })
+                                )
+                                .then(Mono.defer(() -> {
+                                    // Получаем даты первой и последней точки
+                                    String start = (String) finalTrack.getFirst().get("recordedAt");
+                                    String end = (String) finalTrack.getLast().get("recordedAt");
+
+                                    // Выполняем дополнительный вызов для сохранения информации о треке
+                                    return webClient.post()
+                                            .uri(uriBuilder -> uriBuilder.path("api/trips")
+                                                    .queryParam("vehicleId", vehicleId)
+                                                    .queryParam("start", start)
+                                                    .queryParam("end", end)
+                                                    .build())
+                                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
+                                            .retrieve()
+                                            .bodyToMono(Void.class)
+                                            .doOnSuccess(v -> {
+                                                tracksGenerated.incrementAndGet();
+                                                System.out.println("Track " + tracksGenerated.get() + " completed. Total points: " + pointsCnt.get());
+                                            });
+                                }));
+                    })
+                    .then(Mono.defer(() -> {
+                        System.out.println("All tracks generated. Total tracks: " + tracksGenerated.get() + ", total points: " + pointsCnt.get());
+                        return Mono.just(pointsCnt.get());
                     }));
         });
     }
@@ -256,12 +336,14 @@ public class RestClient {
     //                                });
 
     private List<Map<String, Object>> generateTrackByPoints(Long vehicleId, String lon, String lat, String flon,
-                                                            String flat, String startTime) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+                                                            String flat, String startTime) throws IOException, NoSuchAlgorithmException, KeyManagementException, InterruptedException {
         List<Map<String, Object>> result = new ArrayList<>();
-        //Point center = geometryFactory.createPoint(new Coordinate(lon, lat));
+        /*Point center = geometryFactory.createPoint(new Coordinate(Double.parseDouble(lon), Double.parseDouble(lat)));
+        center.setSRID(4326);
         //получение точки конца маршрута
-        //double[] endPointLatLon = generateRandomPointInRadius(lat, lon, radius);
-        //Point endPoint = geometryFactory.createPoint(new Coordinate(endPointLatLon[1], endPointLatLon[0]));
+        double[] endPointLatLon = generateRandomPointInRadius(Double.parseDouble(lat), Double.parseDouble(lon), Integer.parseInt(flon));
+        Point endPoint = geometryFactory.createPoint(new Coordinate(endPointLatLon[1], endPointLatLon[0]));
+        endPoint.setSRID(4326);*/
         //логика создания трека
         // Задаем точки маршрута (старт, промежуточные, финиш)
         /*List<String> points = List.of(
@@ -269,13 +351,21 @@ public class RestClient {
                 //"52.5185,13.4081",     // Промежуточная точка
                 "53.225695,50.262820"      // Конечная точка
         );*/
-
-        List<String> points = List.of(
+        List<String> points = formatPointsForGenerate(lon, lat, Integer.parseInt(flon));
+        /*List<String> points = List.of(
                 lon + "," + lat, //"54.306276,48.353992", // Берлин, Бранденбургские ворота
-                flon + "," + flat      // Конечная точка
-        );
+                endPointLatLon[1] + "," + endPointLatLon[0]      // Конечная точка
+        );*/
+
+
+
         // Генерируем трек
         List<TrackPoint> track = generateTrack(points, startTime,  10); // 10 сек между точками
+        for (int i = 0; i < 20 && track == null; i++) {
+            Thread.sleep(7000);
+            points = formatPointsForGenerate(lon, lat, Integer.parseInt(flon));
+            track = generateTrack(points, startTime,  10); // 10 сек между точками
+        }
         System.out.println("[DEBUG] track.size() = " + track.size());
         List<VehicleTrack> adjustedTrack = new ArrayList<>();
 
@@ -288,6 +378,18 @@ public class RestClient {
         }
 
         return result;
+    }
+
+    private List<String> formatPointsForGenerate(String lon, String lat, int radius) {
+        Point center = geometryFactory.createPoint(new Coordinate(Double.parseDouble(lon), Double.parseDouble(lat)));
+        center.setSRID(4326);
+        double[] endPointLatLon = generateRandomPointInRadius(center.getY(), center.getX(), radius);
+        Point endPoint = geometryFactory.createPoint(new Coordinate(endPointLatLon[1], endPointLatLon[0]));
+        endPoint.setSRID(4326);
+        return List.of(
+                lon + "," + lat, //"54.306276,48.353992", // Берлин, Бранденбургские ворота
+                endPointLatLon[1] + "," + endPointLatLon[0]      // Конечная точка
+        );
     }
 
     /**

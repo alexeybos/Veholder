@@ -80,6 +80,7 @@ public class GraphHopperTrackGenerator {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(json);
         JsonNode path = root.path("paths").get(0);
+        if (path == null || path.path("points") == null) return null;
         JsonNode coordinates = path.path("points").path("coordinates");
 
         List<TrackPoint> track = new ArrayList<>();

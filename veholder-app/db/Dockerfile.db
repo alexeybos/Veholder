@@ -1,0 +1,8 @@
+FROM postgis/postgis:12-3.5-alpine
+
+# Копируем SQL-скрипт
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# (Опционально) Настраиваем переменные окружения
+ENV POSTGRES_USER=tester_adm
+ENV POSTGRES_PASSWORD=tester

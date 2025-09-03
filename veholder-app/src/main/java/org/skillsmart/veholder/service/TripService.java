@@ -95,8 +95,10 @@ public class TripService {
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().lower(), enterpriseZone),
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().upper(), enterpriseZone),
                     first.getId(), last.getId(),
-                    YandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
-                    YandexGeocoder.getAddressDescByYandex(last.getPoint().getX(), last.getPoint().getY())));
+                            "Проверка скорости запроса без геокодера",
+                    //YandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
+                    "Проверка скорости запроса без геокодера") //YandexGeocoder.getAddressDescByYandex(last.getPoint().getX(), last.getPoint().getY()))
+            );
         }
         return tripsInfo;
     }

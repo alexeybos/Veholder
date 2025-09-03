@@ -45,6 +45,8 @@
       width: 50%;
       padding: 15px;
       overflow-y: auto;
+      height: 70vh; /* 70% от высоты экрана */
+      max-height: 70vh;
       border-right: 1px solid #dee2e6;
     }
     #mapContainer {
@@ -1455,10 +1457,11 @@ document.getElementById('reportType').addEventListener('change', function() {
 
   populateReportsEnterprisesDropdown();
   populateReportsVehiclesDropdown();
-
+  console.log(report.parameters);
   // Добавляем поля для дополнительных параметров
   if (report && report.parameters) {
-    report.parameters.forEach(param => {
+    //report.parameters.forEach(param => {
+    Object.values(report.parameters).forEach(param => {
       const div = document.createElement('div');
       div.className = 'mb-3';
       div.innerHTML = `
@@ -1475,7 +1478,7 @@ document.getElementById('generateReportBtn').addEventListener('click', generateR
 
 // Генерация отчета
 async function generateReport() {
-  const reportId = 4; //document.getElementById('reportType').value;
+  const reportId = document.getElementById('reportType').value;
   const enterpriseId = document.getElementById('reportEnterpriseId').value;
   const carId = document.getElementById('reportCarId').value;
   const periodType = document.getElementById('periodType').value;
@@ -1490,18 +1493,21 @@ async function generateReport() {
   // Собираем дополнительные параметры
   const additionalParams = {};
   const report = reportsList.find(r => r.id == reportId);
+  console.log(report);
 
   if (report && report.parameters) {
-    report.parameters.forEach(param => {
+    //report.parameters.forEach(param => {
+    Object.entries(report.parameters).forEach(([paramId, param]) => {
       const paramValue = document.getElementById(`param_${param}`).value;
       if (paramValue) {
-        additionalParams[param] = paramValue;
+        additionalParams[paramId] = paramValue;
       }
     });
   }
 
   // Формируем URL с параметрами
-  const params = new URLSearchParams();
+  /*const params = new URLSearchParams();
+  params.append('type', reportId);
   params.append('enterpriseId', enterpriseId);
   params.append('carId', carId);
   params.append('periodType', periodType);
@@ -1511,13 +1517,36 @@ async function generateReport() {
   // Добавляем дополнительные параметры
   Object.entries(additionalParams).forEach(([key, value]) => {
     params.append(key, value);
+  });*/
+
+  const bodyParams = {
+    type: reportId,
+    vehicleId: carId,
+    period: periodType,
+    startDate: startDate,
+    endDate: endDate
+  };
+
+  // Добавляем дополнительные параметры
+  console.log('bodyParams');
+  console.log(bodyParams);
+  console.log(additionalParams);
+
+  Object.entries(additionalParams).forEach(([key, value]) => {
+    bodyParams[key] = value;
   });
+  console.log('bodyParams + additional');
+  console.log(bodyParams);
 
   try {
-    const response = await fetch(`/api/reports/${reportId}?${params.toString()}`, {
+    //const response = await fetch(`/api/reports/${reportId}?${params.toString()}`, {
+    const response = await fetch(`/api/reports`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json' // Указываем тип контента
+      },
+      body: JSON.stringify(bodyParams)
     });
 
     if (!response.ok) throw new Error('Ошибка формирования отчета');
@@ -1534,7 +1563,11 @@ async function generateReport() {
 // Отображение результатов отчета
 function showReportResult(reportData, reportId) {
   const report = reportData; //reportsList.find(r => r.id == reportId);
-  if (report.name == 'Отчет по пробегу для A111AA111') {
+  console.log('report');
+  console.log(report);
+  console.log('reportId');
+  console.log(reportId);
+  if (reportId == 'MILEAGE') {
       document.getElementById('reportResultTitle').textContent = `Результаты отчета: ${report ? report.name : ''}`;
       const tbody = document.querySelector('#reportResultTable tbody');
       tbody.innerHTML = '';

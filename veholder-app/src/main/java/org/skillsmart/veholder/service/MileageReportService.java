@@ -12,6 +12,7 @@ import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,19 @@ public class MileageReportService {
                         (a, b) -> a,               // merge function
                         LinkedHashMap::new         // сохраняем порядок
                 ));
+    }
+
+    public MileageReport getMileageReport(Map<String, Object> params) throws JsonProcessingException {
+        Long vehicleId = (Long) params.get("vehicleId");
+        Period period = (Period) params.get("period");
+        //DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        LocalDateTime startDate = LocalDateTime.parse((String) params.get("startDate"), formatter);
+        LocalDateTime endDate = LocalDateTime.parse((String) params.get("endDate"), formatter);
+        // сначала ищем в таблице отчет точно по имеющимся параметрам
+
+        // если не нашли - преобразовываем параметры и генерируем
+        return generateMileageReport(vehicleId, period, startDate, endDate);
     }
 
 }

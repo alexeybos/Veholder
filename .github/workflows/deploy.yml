@@ -15,6 +15,6 @@ jobs:
 
       - name: Run deploy script
         run: |
-          cd home/ci_cd
+          cd ~/ci_cd
           chmod +x deploy_tst.sh
           ./deploy_tst.sh

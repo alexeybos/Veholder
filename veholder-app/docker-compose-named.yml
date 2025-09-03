@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  app:  # Spring Boot приложение
+    build: .  # Собираем образ из Dockerfile в текущей папке
+    ports:
+      - "8080:8080"  # Пробрасываем порт 8080 наружу
+    depends_on:
+      db:
+        condition: service_healthy  # Ждем, пока БД станет доступна
+
+  db:  # PostgreSQL
+    image: my_postgres_with_data
+    environment:
+      POSTGRES_USER: tester_adm  
+      POSTGRES_PASSWORD: tester
+      POSTGRES_DB: veholder
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pg_data:/var/lib/postgresql/data  # Сохраняем данные БД между перезапусками
+
+volumes:
+  pg_data:  # Том для хранения данных PostgreSQL

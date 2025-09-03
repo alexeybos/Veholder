@@ -7,6 +7,8 @@ import org.springframework.shell.standard.ShellOption;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +64,7 @@ public class ShellGeneratorVehiclesDrivers {
         }
     }
 
-    @ShellMethod(key = "track", value = "Generate for vehicle {vehicleId} track in real time")
+    @ShellMethod(key = "track", value = "Generate for vehicle {vehicleId} track in real time (if time is null)")
     public void generateTrackForVehicle(
             @ShellOption(
                     value = {"-u", "--user"},
@@ -79,27 +81,27 @@ public class ShellGeneratorVehiclesDrivers {
             @ShellOption(
                     value = {"-o", "--longitude"},
                     help = "долгота стартовой точки"
-            ) Double lon,
+            ) String lon,
             @ShellOption(
                     value = {"-a", "--latitude"},
                     help = "широта стартовой точки"
-            ) Double lat,
+            ) String lat,
             @ShellOption(
-                    value = {"-r", "--radius"},
-                    help = "радиус (км) в котором  будет генерироваться трек"
-            ) Integer radius,
+                    value = {"-r", "--flongitude"},
+                    help = "долгота конечной точки"
+            ) String flon,
             @ShellOption(
-                    value = {"-l", "--length"},
-                    help = "длина трека (км)"
-            ) Integer length,
-            @ShellOption(
-                    value = {"-s", "--speed"},
-                    help = "средняя скорость движения автомобиля (км/ч)"
-            ) Integer speed) throws IOException {
+                    value = {"-l", "--flatitude"},
+                    help = "широта конечной точки"
+            ) String flat,
+            @ShellOption(defaultValue = ShellOption.NULL,
+                    value = {"-t", "--time"},
+                    help = "время начала (yyyy-mm-ddThh24:mi:ss)"
+            ) String startTime) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         restClient.getToken(username, pass)
                 .then(Mono.just("Auth completed")).block(Duration.ofSeconds(5));
 
-        restClient.generateVehicleTrack(vehicleId, lon, lat, radius, speed, length)
+        restClient.generateVehicleTrack(vehicleId, lon, lat, flon, flat, startTime)
                 .subscribe(packsCnt -> {
                     System.out.println("Generation complete. For vehicleId [" + vehicleId + "] Generated " + packsCnt + " geo points");
                 });

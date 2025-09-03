@@ -1,0 +1,20 @@
+name: Run Deploy Script
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run deploy script
+        run: |
+          cd home/ci_cd
+          chmod +x deploy_tst.sh
+          ./deploy_tst.sh

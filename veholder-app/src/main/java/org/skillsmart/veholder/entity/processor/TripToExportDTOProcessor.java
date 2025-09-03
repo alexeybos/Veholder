@@ -1,7 +1,6 @@
 package org.skillsmart.veholder.entity.processor;
 
 import org.skillsmart.veholder.entity.Enterprise;
-import org.skillsmart.veholder.entity.Trip;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleTrack;
 import org.skillsmart.veholder.entity.dto.TripDatesDTO;

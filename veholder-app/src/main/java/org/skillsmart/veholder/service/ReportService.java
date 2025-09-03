@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ReportService {
@@ -21,6 +18,12 @@ public class ReportService {
 
     @Autowired
     private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private DriverHoursReportService driverHoursReportService;
+
+    @Autowired
+    private MileageReportService mileageReportService;
 
     /*public List<Report> getAllReports() {
         return reportRepository.findAll();
@@ -34,12 +37,13 @@ public class ReportService {
         /*Map<String, String> params1 = new HashMap<>();
         params1.put("enterpriseId", "Предприятие");
         params1.put("vehicleId", "Номер машины");*/
-        List<String> params1 = new ArrayList<>();
+        //List<String> params1 = new ArrayList<>();
+        Map<String, String> params1 = new HashMap<>();
         reports.add(report);
         Map<String, Object> driverReport = new HashMap<>();
         driverReport.put("id", DriverHoursReport.reportTypeId);
         driverReport.put("name", DriverHoursReport.reportTypeName);
-        params1.add("Водитель");
+        params1.put("driverName", "Водитель");
         driverReport.put("parameters", params1);
         reports.add(driverReport);
         return reports;
@@ -48,6 +52,19 @@ public class ReportService {
     public Report getReportById(Long id) {
         return reportRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Report not found"));
+    }
+
+    public Report getReportByParams(Map<String, Object> params) throws Exception {
+        String reportType = (String) params.get("type");
+        if (Objects.equals(reportType, DriverHoursReport.reportTypeId)) {
+            return driverHoursReportService.getDriverHoursReportByParams(params);
+        }
+
+        if (Objects.equals(reportType, MileageReport.reportTypeId)) {
+            return mileageReportService.getMileageReport(params);
+        }
+        throw new NotFoundException("Report type not found");
+        //return  new NotFoundException("Report not found"));
     }
 
     // Другие общие методы

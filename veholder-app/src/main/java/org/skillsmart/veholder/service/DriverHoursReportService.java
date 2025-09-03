@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class DriverHoursReportService {
                 .orElseThrow(() -> new NotFoundException("Vehicle not found"));
 
         DriverHoursReport report = new DriverHoursReport();
-        report.setName("Отчет по водителю (Сидоров) для " + vehicle.getRegistrationNumber());
+        report.setName("Отчет по водителю (" + driverName + ") для " + vehicle.getRegistrationNumber());
         report.setPeriod(period);
         report.setStartDate(startDate);
         report.setEndDate(endDate);
@@ -107,5 +108,28 @@ public class DriverHoursReportService {
         }
 
         return result;
+    }
+
+    public DriverHoursReport getDriverHoursReportByParams(Map<String, Object> params) throws Exception {
+        Long vehicleId = Long.parseLong((String) params.get("vehicleId"));
+        String periodName = (String) params.get("period");
+        Period period;
+        try {
+            period = Period.valueOf(periodName.toUpperCase()); // Приводим к верхнему регистру
+        } catch (IllegalArgumentException e) {
+            System.out.println("Неверное значение периода: " + periodName);
+            period = Period.DAY;
+        }
+        //DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        LocalDate start = LocalDate.parse((String) params.get("startDate"), formatter);
+        LocalDateTime startDate = start.atStartOfDay();
+        LocalDate end = LocalDate.parse((String) params.get("endDate"), formatter);
+        LocalDateTime endDate = end.atTime(23, 59, 59);
+        String driverName = (String) params.get("driverName");
+        // сначала ищем в таблице отчет точно по имеющимся параметрам
+
+        // если не нашли - преобразовываем параметры и генерируем
+        return generateDriverHoursReport(vehicleId, period, startDate, endDate, driverName);
     }
 }

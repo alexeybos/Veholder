@@ -1,9 +1,12 @@
 package org.skillsmart.veholder.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.dto.EnterpriseDto;
 import org.skillsmart.veholder.entity.dto.VehicleDTO;
+import org.skillsmart.veholder.repository.EnterpriseRepository;
 import org.skillsmart.veholder.service.EnterpriseService;
 import org.skillsmart.veholder.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,30 +30,31 @@ import java.util.Map;
 public class EnterpriseRestController {
 
     @Autowired
-    private EnterpriseService service;
+    private EnterpriseRepository repo;
     @Autowired
     private VehicleService vehicleService;
+    @Autowired
+    private final ObjectMapper objectMapper;
 
-    /*@GetMapping(value = "")
-    public ResponseEntity<List<Enterprise>> getEnterprises() {
-        return new ResponseEntity<>(service.getEnterprises(), HttpStatus.OK);
-    }*/
+    public EnterpriseRestController(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @GetMapping(value = "")
     public ResponseEntity<List<EnterpriseDto>> getEnterprises() {
-        return new ResponseEntity<>(service.getEnterprisesByManager(), HttpStatus.OK);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return new ResponseEntity<>(repo.getEnterprisesByManager(authentication.getName()), HttpStatus.OK);
     }
-
-    /*@GetMapping(value = "/{id}")
-    public ResponseEntity<Enterprise> getEnterpriseById(@PathVariable Long id) {
-        Enterprise enterprise = service.getEnterpriseById(id);
-        if (enterprise != null) return ResponseEntity.ok(enterprise);
-        return ResponseEntity.notFound().build();
-    }*/
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<JsonNode> getEnterpriseById(@PathVariable Long id) {
-        JsonNode enterprise = service.getFullEnterpriseInfoById(id);
+        JsonNode enterprise;
+        try {
+            String result = repo.getFullEnterpriseInfoById(id);
+            enterprise = objectMapper.readTree(result);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse JSON", e);
+        }
         if (enterprise != null) return ResponseEntity.ok(enterprise);
         return ResponseEntity.notFound().build();
     }
@@ -56,22 +62,26 @@ public class EnterpriseRestController {
     @GetMapping(value = "/{id}/export")
     public ResponseEntity<JsonNode> exportEnterpriseById(@PathVariable Long id,
                                                          @RequestParam(defaultValue = "json") String format) {
-        JsonNode enterprise = service.getFullEnterpriseInfoById(id);
+        JsonNode enterprise;
+        try {
+            String result = repo.getFullEnterpriseInfoById(id);
+            enterprise = objectMapper.readTree(result);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse JSON", e);
+        }
         if (enterprise != null) return ResponseEntity.ok(enterprise);
         return ResponseEntity.notFound().build();
     }
 
-    /*@GetMapping(value = "/{id}/drivers")
-    public ResponseEntity<EnterprisesDriversDto> getDriversFromEnterpriseById(@PathVariable Long id) {
-        //Enterprise enterprise = service.getEnterpriseById(id);
-        EnterprisesDriversDto enterprises = service.getDriversByEnterpriseId(id);
-        if (enterprises != null && !enterprises.isEmpty()) return ResponseEntity.ok(enterprises.getFirst());
-        return ResponseEntity.notFound().build();
-    }*/
     @GetMapping(value = "/{id}/drivers")
     public ResponseEntity<JsonNode> getDriversFromEnterpriseById(@PathVariable Long id) {
-        //Enterprise enterprise = service.getEnterpriseById(id);
-        JsonNode enterprises = service.getDriversByEnterpriseIdJson(id);
+        String result = repo.getDriversByEnterpriseJson(id);
+        JsonNode enterprises;
+        try {
+            enterprises = objectMapper.readTree(result);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse JSON", e);
+        }
         if (enterprises != null) return ResponseEntity.ok(enterprises);
         return ResponseEntity.notFound().build();
     }
@@ -90,23 +100,29 @@ public class EnterpriseRestController {
 
     @PostMapping(value = "")
     public ResponseEntity<?> createEnterprise(@RequestBody Enterprise enterprise) {
-        try {
-            Long id = service.createEnterprise(enterprise);
-            return ResponseEntity.ok(id);
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-                    "error", "Access Denied",
-                    "message", e.getMessage(),
-                    "timestamp", LocalDateTime.now()
-            ));
+        if (checkEnterpriseByManager(enterprise.getId())) {
+            Enterprise created = repo.save(enterprise);
+            return ResponseEntity.ok(created.getId());
         }
-
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                "error", "Access Denied",
+                "message", "Создание предприятия разрешено только менеджеру. Пользователь не является менеджером!",
+                "timestamp", LocalDateTime.now()
+        ));
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<?> updateEnterprise(@PathVariable Long id, @RequestBody Map<String, Object> enterprise) {
+    public ResponseEntity<?> updateEnterprise(@PathVariable Long id, @RequestBody Map<String, Object> values) {
         try {
-            service.updateEnterprise(id, enterprise);
+            if (!checkEnterpriseByManager(id)) {
+                throw new AccessDeniedException("Можно редактировать только свое предприятие!");
+            }
+            Enterprise enterprise = repo.getReferenceById(id);
+            enterprise.setCity(values.getOrDefault("city", enterprise.getCity()).toString());
+            enterprise.setName(values.getOrDefault("name", enterprise.getName()).toString());
+            enterprise.setDirectorName(values.getOrDefault("directorName", enterprise.getDirectorName()).toString());
+            repo.save(enterprise);
+            repo.flush();
             return ResponseEntity.ok().build();
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
@@ -120,7 +136,12 @@ public class EnterpriseRestController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteEnterprise(@PathVariable Long id) {
         try {
-            service.deleteEnterprise(id);
+            if (!checkEnterpriseByManager(id)) {
+                throw new AccessDeniedException("Можно удалить только свое предприятие!");
+            }
+            repo.deleteEnterpriseManagersLink(id);
+            repo.deleteEnterprise(id);
+            repo.flush();
             return ResponseEntity.ok().build();
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
@@ -129,6 +150,15 @@ public class EnterpriseRestController {
                     "timestamp", LocalDateTime.now()
             ));
         }
+    }
+
+    private boolean checkEnterpriseByManager(Long id) {
+        return repo.checkEnterpriseByManager(id, getManagerName()) > 0;
+    }
+
+    private String getManagerName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
 }

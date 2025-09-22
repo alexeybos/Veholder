@@ -29,7 +29,6 @@ public class ManagerRestController {
 
     @PostMapping(value = "post/managers")
     public ResponseEntity<List<ManagerDTO>> getEnterpriseById() {
-        //JsonNode enterprise = service.getFullEnterpriseInfoById(id);
         return new ResponseEntity<>(service.getManagersList(), HttpStatus.OK);
     }
 

@@ -1,8 +1,6 @@
 package org.skillsmart.veholder.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.skillsmart.veholder.entity.dto.ReportRequest;
-import org.skillsmart.veholder.entity.report.DriverHoursReport;
 import org.skillsmart.veholder.entity.report.Report;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

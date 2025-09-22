@@ -1,7 +1,5 @@
 package org.skillsmart.veholder.service;
 
-import org.skillsmart.veholder.entity.Brand;
-import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleProjection;
 import org.skillsmart.veholder.entity.dto.VehicleDTO;

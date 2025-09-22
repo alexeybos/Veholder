@@ -96,10 +96,6 @@ public class VehicleTrackRestController {
             return ResponseEntity.badRequest().body("File is empty");
         }
 
-        /*if (!file.getOriginalFilename().toLowerCase().endsWith(".gpx")) {
-            return ResponseEntity.badRequest().body("Only GPX files are allowed");
-        }*/
-
         try {
             service.uploadTrack(vehicleId, file);
             return ResponseEntity.ok().build();

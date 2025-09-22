@@ -66,6 +66,4 @@ public class ReportService {
         throw new NotFoundException("Report type not found");
         //return  new NotFoundException("Report not found"));
     }
-
-    // Другие общие методы
 }

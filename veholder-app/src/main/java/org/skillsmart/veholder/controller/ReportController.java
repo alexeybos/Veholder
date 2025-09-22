@@ -14,11 +14,6 @@ public class ReportController {
     @Autowired
     private ReportService reportService;
 
-    /*@GetMapping
-    public List<Report> getAllReports() {
-        return reportService.getAllReports();
-    }*/
-
     @GetMapping
     public List<Map<String, Object>> getAllReports() {
         return reportService.getAllReports();

@@ -36,43 +36,6 @@ public class EnterpriseService {
         this.objectMapper = objectMapper;
     }
 
-    public List<Enterprise> getEnterprises() {
-        Sort sort = Sort.by("id").ascending();
-        return repo.findAll(sort);
-    }
-
-    public List<EnterpriseDto> getEnterprisesByManager() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return getEnterprisesByManager(authentication.getName());
-        /*return repo.getDriversDTOByManager(username)
-                .stream()
-                .map(driver -> new DriverDto(driver.getId(), driver.getName(), driver.getBirthDate(),
-                        driver.getSalary(), driver.getEnterprise().getId(),
-                        Optional.ofNullable(driver.getVehicle()).orElse(new Vehicle()).getId(), driver.isActive()))
-                .toList();*/
-    }
-
-    public List<EnterpriseDto> getEnterprisesByManager(String username) {
-        return repo.getEnterprisesByManager(username);
-    }
-
-    public Enterprise getEnterpriseById(Long id) {
-        return repo.getReferenceById(id);
-    }
-
-    public void save(Enterprise enterprise) {
-        repo.save(enterprise);
-    }
-
-    public void delete(Long id) {
-        repo.deleteById(id);
-    }
-
-    public EnterprisesDriversDto getDriversByEnterpriseId(Long id) {
-        List<EnterprisesDriversDto> result = repo.getDriversByEnterprise(id);
-        return result.getFirst();
-    }
-
     public JsonNode getDriversByEnterpriseIdJson(Long id) {
         String result = repo.getDriversByEnterpriseJson(id);
         try {
@@ -122,12 +85,6 @@ public class EnterpriseService {
     }
 
     public void deleteEnterprise(Long id) {
-        if (!checkEnterpriseByManager(id)) {
-            throw new AccessDeniedException("Можно удалить только свое предприятие!");
-        }
-        //repo.deleteById(id);
-        repo.deleteEnterpriseManagersLink(id);
-        repo.deleteEnterprise(id);
-        repo.flush();
+
     }
 }

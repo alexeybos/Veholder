@@ -5,6 +5,7 @@ import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.dto.DriverDto;
 import org.skillsmart.veholder.entity.dto.DriverNoDateDto;
+import org.skillsmart.veholder.repository.DriverPagingRepository;
 import org.skillsmart.veholder.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -26,19 +29,13 @@ public class DriverRestController {
     @Autowired
     private DriverService service;
 
-    /*@GetMapping(value = "")
-    public ResponseEntity<List<DriverDto>> getDrivers() {
-        return ResponseEntity.ok(service.getDriversDto());
-    }*/
-
-    /*@GetMapping(value = "")
-    public ResponseEntity<List<DriverNoDateDto>> getDrivers() {
-        return ResponseEntity.ok(service.getDriversDtoByManager());
-    }*/
+    @Autowired
+    private DriverPagingRepository driverPageRepo;
 
     @GetMapping(value = "")
     public ResponseEntity<Map<String, Object>> getDrivers(Pageable pageable) {
-        Page<DriverNoDateDto> page = service.getDriversDtoByManagerPaged(pageable);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Page<DriverNoDateDto> page = driverPageRepo.getDriversDTOByManager(pageable, authentication.getName());
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("currentPage", page.getNumber());

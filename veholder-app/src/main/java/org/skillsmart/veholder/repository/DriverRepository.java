@@ -23,4 +23,11 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
             nativeQuery = true
     )
     Long getDriversCountOnVehicle(Long vehicleId);
+
+    @Query(
+            value = "select d.id, d.name, d.salary, d.enterprise_id, d.vehicle_id, d.is_active from drivers d " +
+                    "where d.vehicle_id = :vehicleId and d.is_active = true",
+            nativeQuery = true
+    )
+    DriverNoDateDto getActiveDriverByVehicle(Long vehicleId);
 }

@@ -1,6 +1,5 @@
 package org.skillsmart.veholder.controller;
 
-import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.service.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

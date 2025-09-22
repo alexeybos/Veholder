@@ -14,10 +14,6 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
-    /*@PersistenceContext
-    private EntityManager entityManager;*/
-
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -25,9 +21,6 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
-    /*@Autowired
-    private BCryptPasswordEncoder passwordEncoder;*/
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -52,8 +45,6 @@ public class UserService implements UserDetailsService {
             return false;
         }
 
-        //user.setRoles(Collections.singleton(new Role(1L, "ROLE_USER")));
-        //user.setPassword("{noop}" + user.getPassword());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return true;
@@ -67,8 +58,4 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    /*public List<User> usergtList(Long idMin) {
-        return entityManager.createQuery("SELECT u FROM User u WHERE u.id > :paramId", User.class)
-                .setParameter("paramId", idMin).getResultList();
-    }*/
 }

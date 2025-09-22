@@ -15,13 +15,10 @@ import lombok.Getter;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleTrack;
 import org.skillsmart.veholder.entity.dto.VehicleTrackDto;
 import org.skillsmart.veholder.jaxb.Gpx;
-import org.skillsmart.veholder.jaxb.Track;
-import org.skillsmart.veholder.jaxb.TrackSegment;
 import org.skillsmart.veholder.jaxb.Waypoint;
 import org.skillsmart.veholder.repository.VehicleRepository;
 import org.skillsmart.veholder.repository.VehicleTrackRepository;
@@ -31,11 +28,8 @@ import org.skillsmart.veholder.utils.GeoJsonGeometry;
 import org.skillsmart.veholder.utils.GeoJsonPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -48,7 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.skillsmart.veholder.repository.spec.TrackSpecifications.*;
+import static org.skillsmart.veholder.repository.spec.TrackSpecifications.byVehicleId;
+import static org.skillsmart.veholder.repository.spec.TrackSpecifications.timeIntervalIn;
 
 @Service
 public class VehicleTrackService {

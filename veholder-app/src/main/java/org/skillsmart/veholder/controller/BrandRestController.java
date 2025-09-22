@@ -1,7 +1,7 @@
 package org.skillsmart.veholder.controller;
 
 import org.skillsmart.veholder.entity.Brand;
-import org.skillsmart.veholder.service.BrandService;
+import org.skillsmart.veholder.repository.BrandRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -18,17 +18,17 @@ import java.util.List;
 public class BrandRestController {
 
     @Autowired
-    private BrandService brandService;
+    BrandRepository repo;
 
     @GetMapping(value = "")
     public ResponseEntity<List<Brand>> getBrands() {
         Sort sortBy = Sort.by("id").ascending();
-        return new ResponseEntity<>(brandService.getList(sortBy), HttpStatus.OK);
+        return new ResponseEntity<>(repo.findAll(sortBy), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<Brand> getBrandById(@PathVariable Long id) {
-        Brand brand = brandService.getBrandById(id);
+        Brand brand = repo.getReferenceById(id);
         return new ResponseEntity<>(brand, HttpStatus.OK);
     }
 }

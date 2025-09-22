@@ -33,18 +33,6 @@ public class VehicleRestController {
         return new ResponseEntity<>(service.getList(sortBy), HttpStatus.OK);
     }
 
-    /*@GetMapping(value = "")
-    public ResponseEntity<List<VehicleProjection>> getVehiclesLazy() {
-        Sort sortBy = Sort.by("id").ascending();
-        return new ResponseEntity<>(service.getOnlyVehiclesList(sortBy), HttpStatus.OK);
-    }*/
-
-    /*@GetMapping(value = "")
-    public ResponseEntity<List<VehicleProjection>> getVehiclesLazy() {
-        Sort sortBy = Sort.by("id").ascending();
-        return new ResponseEntity<>(service.getOnlyVehiclesListForManager(), HttpStatus.OK);
-    }*/
-
     @GetMapping(value = "")
     public ResponseEntity<Map<String, Object>> getVehiclesPages(Pageable pageable) {
         Page<VehicleProjection> page = service.getPagingVehicles(pageable);
@@ -61,11 +49,6 @@ public class VehicleRestController {
     public ResponseEntity<VehicleProjection> getVehicle(@PathVariable Long id) {
         return new ResponseEntity<>(service.getVehicleProjectedById(id), HttpStatus.OK);
     }
-
-    /*@PostMapping(value = "")
-    public ResponseEntity<Long> createVehicle(@RequestBody Vehicle vehicle) {
-        return ResponseEntity.ok(service.createVehicle(vehicle));
-    }*/
 
     @PostMapping(value = "")
     public ResponseEntity<?> createVehicle(@RequestBody VehicleDTO vehicle) {

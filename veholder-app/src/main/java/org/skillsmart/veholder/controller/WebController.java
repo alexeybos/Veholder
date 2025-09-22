@@ -1,7 +1,9 @@
 package org.skillsmart.veholder.controller;
 
 import org.skillsmart.veholder.entity.*;
-import org.skillsmart.veholder.entity.dto.EnterpriseDto;
+import org.skillsmart.veholder.repository.BrandRepository;
+import org.skillsmart.veholder.repository.DriverRepository;
+import org.skillsmart.veholder.repository.EnterpriseRepository;
 import org.skillsmart.veholder.repository.ManagerRepository;
 import org.skillsmart.veholder.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.security.Principal;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
@@ -29,11 +30,11 @@ public class WebController {
     @Autowired
     private VehicleService vehicleService;
     @Autowired
-    private BrandService brandService;
+    private BrandRepository brandRepo;
     @Autowired
-    private EnterpriseService enterpriseService;
+    private EnterpriseRepository enterpriseRepo;
     @Autowired
-    private DriverService driverService;
+    private DriverRepository driverRepo;
     @Autowired
     private ManagerRepository managerRepo;
 
@@ -47,11 +48,11 @@ public class WebController {
         Sort sortVehicles = Sort.by("id").ascending();
         List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
         Sort sortBrands = Sort.by("id").ascending();
-        List<Brand> brands = brandService.getList(sortBrands);
+        List<Brand> brands = brandRepo.findAll(sortBrands);
         Sort sortEnterprises = Sort.by("id").ascending();
-        List<Enterprise> enterprises = enterpriseService.getEnterprises();
+        List<Enterprise> enterprises = enterpriseRepo.findAll(sortEnterprises);;
         Sort sortDrivers = Sort.by("id").ascending();
-        List<Driver> drivers = driverService.getDrivers(sortDrivers);
+        List<Driver> drivers = driverRepo.findAll(sortDrivers);
 
         model.addAttribute("vehicles", vehicles);
         model.addAttribute("brands", brands);
@@ -85,9 +86,10 @@ public class WebController {
         Vehicle vehicle = new Vehicle();
         model.addAttribute("vehicle", vehicle);
         Sort sortBrands = Sort.by("name").ascending();
-        List<Brand> brands = brandService.getList(sortBrands);
+        List<Brand> brands = brandRepo.findAll(sortBrands);
         model.addAttribute("brands", brands);
-        List<Enterprise> enterprises = enterpriseService.getEnterprises();
+        Sort sortEnterprises = Sort.by("id").ascending();
+        List<Enterprise> enterprises = enterpriseRepo.findAll(sortEnterprises);
         model.addAttribute("enterprises", enterprises);
         return "vehicle";
     }
@@ -97,9 +99,9 @@ public class WebController {
         Vehicle vehicle = vehicleService.getVehicleById(id);
         model.addAttribute("vehicle", vehicle);
         Sort sortBrands = Sort.by("name").ascending();
-        List<Brand> brands = brandService.getList(sortBrands);
+        List<Brand> brands = brandRepo.findAll(sortBrands);
         model.addAttribute("brands", brands);
-        List<Enterprise> enterprises = enterpriseService.getEnterprises();
+        List<Enterprise> enterprises = enterpriseRepo.findAll();
         model.addAttribute("enterprises", enterprises);
         return "vehicle";
     }
@@ -125,20 +127,20 @@ public class WebController {
 
     @RequestMapping("brand/edit")
     public String editBrand(Model model, @RequestParam Long id) {
-        Brand brand = brandService.getBrandById(id);
+        Brand brand = brandRepo.getReferenceById(id);
         model.addAttribute("brand", brand);
         return "brand";
     }
 
     @RequestMapping("brand/delete")
     public String delBrand(Model model, @RequestParam Long id) {
-        brandService.delete(id);
+        brandRepo.deleteById(id);
         return "redirect:/info";
     }
 
     @RequestMapping(value = "brand/save", method = RequestMethod.POST)
     public String saveBrand(@ModelAttribute("brand") Brand brand) {
-        brandService.save(brand);
+        brandRepo.save(brand);
         return "redirect:/info";
     }
 
@@ -148,7 +150,7 @@ public class WebController {
         List allTimezones = ZoneId.getAvailableZoneIds().stream()
                 .map(ZoneId::of)
                 .sorted(Comparator.comparing(ZoneId::getId))
-                .collect(Collectors.toList());
+                .toList();
         model.addAttribute("enterprise", enterprise);
         //((ZoneRegion) allTimezones.get(467)).getOffset(0)
         model.addAttribute("allTimezones", ZoneId.getAvailableZoneIds().stream()
@@ -160,7 +162,7 @@ public class WebController {
 
     @RequestMapping("enterprise/edit")
     public String editEnterprise(Model model, @RequestParam Long id) {
-        Enterprise enterprise = enterpriseService.getEnterpriseById(id);
+        Enterprise enterprise = enterpriseRepo.getReferenceById(id);
         model.addAttribute("enterprise", enterprise);
         model.addAttribute("allTimezones", ZoneId.getAvailableZoneIds().stream()
                 .map(ZoneId::of)
@@ -171,20 +173,20 @@ public class WebController {
 
     @RequestMapping("enterprise/delete")
     public String delEnterprise(Model model, @RequestParam Long id) {
-        enterpriseService.delete(id);
+        enterpriseRepo.deleteById(id);
         return "redirect:/info";
     }
 
     @RequestMapping(value = "enterprise/save", method = RequestMethod.POST)
     public String saveEnterprise(@ModelAttribute("enterprise") Enterprise enterprise) {
-        enterpriseService.save(enterprise);
+        enterpriseRepo.save(enterprise);
         return "redirect:/info";
     }
 
     @PostMapping("driver/add")
     public String addDriver(Model model) {
         Driver driver = new Driver();
-        List<Enterprise> enterprises = enterpriseService.getEnterprises();
+        List<Enterprise> enterprises = enterpriseRepo.findAll();
         Sort sortVehicles = Sort.by("id").ascending();
         List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
         model.addAttribute("driver", driver);
@@ -195,8 +197,8 @@ public class WebController {
 
     @RequestMapping("driver/edit")
     public String editDriver(Model model, @RequestParam Long id) {
-        Driver driver = driverService.getDriverById(id);
-        List<Enterprise> enterprises = enterpriseService.getEnterprises();
+        Driver driver = driverRepo.getReferenceById(id);
+        List<Enterprise> enterprises = enterpriseRepo.findAll();
         Sort sortVehicles = Sort.by("id").ascending();
         List<Vehicle> vehicles = vehicleService.getList(sortVehicles);
         vehicles.addFirst(new Vehicle());
@@ -208,13 +210,13 @@ public class WebController {
 
     @RequestMapping("driver/delete")
     public String delDriver(Model model, @RequestParam Long id) {
-        driverService.delete(id);
+        driverRepo.deleteById(id);
         return "redirect:/info";
     }
 
     @RequestMapping(value = "driver/save", method = RequestMethod.POST)
     public String saveDriver(@ModelAttribute("driver") Driver driver) {
-        driverService.save(driver);
+        driverRepo.save(driver);
         return "redirect:/info";
     }
 

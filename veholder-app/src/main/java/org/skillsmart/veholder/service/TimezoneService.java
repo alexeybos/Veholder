@@ -2,6 +2,7 @@ package org.skillsmart.veholder.service;
 
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.VehicleProjection;
+import org.skillsmart.veholder.repository.EnterpriseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,11 @@ public class TimezoneService {
     @Autowired
     private VehicleService vehicleService;
     @Autowired
-    private EnterpriseService enterpriseService;
+    private EnterpriseRepository enterpriseRepo;
 
     public ZoneId getEnterpriseTimeZoneByVehicle(Long vehicleId) {
         VehicleProjection vehicle = vehicleService.getVehicleProjectedById(vehicleId);
-        Enterprise enterprise = enterpriseService.getEnterpriseById(vehicle.getEnterpriseId());
+        Enterprise enterprise = enterpriseRepo.getReferenceById(vehicle.getEnterpriseId());
         return enterprise.getTimezone();
     }
 

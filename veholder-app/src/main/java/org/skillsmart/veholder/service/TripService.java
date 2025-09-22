@@ -2,32 +2,25 @@ package org.skillsmart.veholder.service;
 
 import com.vladmihalcea.hibernate.type.range.Range;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Expression;
 import org.skillsmart.veholder.entity.Trip;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleTrack;
-import org.skillsmart.veholder.entity.dto.TripDTO;
 import org.skillsmart.veholder.entity.dto.TripDatesDTO;
 import org.skillsmart.veholder.entity.dto.TripDescriptionDTO;
 import org.skillsmart.veholder.repository.TripRepository;
-import org.skillsmart.veholder.repository.spec.RangeFunctions;
-import org.skillsmart.veholder.repository.spec.TripSpecifications;
 import org.skillsmart.veholder.utils.GeoJsonFeatureCollection;
-import org.skillsmart.veholder.utils.YandexGeocoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import static org.skillsmart.veholder.repository.spec.TripSpecifications.*;
+import static org.skillsmart.veholder.repository.spec.TripSpecifications.byVehicleId;
+import static org.skillsmart.veholder.repository.spec.TripSpecifications.timeIntervalOverlaps;
 
 @Service
 public class TripService {

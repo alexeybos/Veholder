@@ -1,11 +1,13 @@
 package org.skillsmart.veholder.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleProjection;
 import org.skillsmart.veholder.entity.dto.VehicleDTO;
 import org.skillsmart.veholder.repository.VehiclePagingRepository;
 import org.skillsmart.veholder.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,6 +21,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @Transactional
 public class VehicleService {
@@ -114,7 +117,9 @@ public class VehicleService {
         return pageRepo.getVehiclesByManagerPaging(pageable, username);
     }
 
+    @Cacheable("vehicles")
     public Page<VehicleDTO> getPagingVehiclesByEnterprise(Pageable pageable, Long enterpriseId) {
+        log.info("getting {} page of vehicles", pageable.getPageNumber());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return pageRepo.getVehiclesByEnterprise(pageable, enterpriseId, username);

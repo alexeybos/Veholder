@@ -10,6 +10,7 @@ import org.skillsmart.veholder.entity.dto.EnterprisesDriversDto;
 import org.skillsmart.veholder.repository.EnterpriseRepository;
 import org.skillsmart.veholder.repository.ManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -45,6 +46,7 @@ public class EnterpriseService {
         }
     }
 
+    @Cacheable("enterprise")
     public JsonNode getFullEnterpriseInfoById(Long id) {
         try {
             String result = repo.getFullEnterpriseInfoById(id);

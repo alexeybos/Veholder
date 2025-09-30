@@ -7,17 +7,23 @@ import java.net.http.HttpResponse;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.json.JSONArray;
+import org.springframework.cache.annotation.Cacheable;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+@Slf4j
 public class YandexGeocoder {
+
+    @Cacheable("tripInfo")
     public static String getAddressDescByYandex(double lon, double lat) throws Exception {
         /*double lat = 55.751244;
         double lon = 37.618423;*/
+        log.info("Getting yandex address for ({} - {})", lon, lat);
         String apiKey = "53095c96-f6eb-4292-9d70-b65a0377f935";
 
         String url = String.format(

@@ -2,6 +2,7 @@ package org.skillsmart.veholder.service;
 
 import com.vladmihalcea.hibernate.type.range.Range;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.skillsmart.veholder.entity.Trip;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleTrack;
@@ -9,7 +10,9 @@ import org.skillsmart.veholder.entity.dto.TripDatesDTO;
 import org.skillsmart.veholder.entity.dto.TripDescriptionDTO;
 import org.skillsmart.veholder.repository.TripRepository;
 import org.skillsmart.veholder.utils.GeoJsonFeatureCollection;
+import org.skillsmart.veholder.utils.YandexGeocoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,7 @@ import java.util.List;
 import static org.skillsmart.veholder.repository.spec.TripSpecifications.byVehicleId;
 import static org.skillsmart.veholder.repository.spec.TripSpecifications.timeIntervalOverlaps;
 
+@Slf4j
 @Service
 public class TripService {
 
@@ -73,7 +77,9 @@ public class TripService {
     /**
      * Полная информация по поездкам в интервале
      */
+    //@Cacheable("tripInfo")
     public List<TripDescriptionDTO> getTripsInfo(Long vehicleId, ZonedDateTime start, ZonedDateTime end) throws Exception {
+        //log.info("Getting trio info for vehicleId {} ({} - {})", vehicleId, start, end);
         List<Trip> trips = findTripsWithinInterval(vehicleId, start, end);
         List<TripDescriptionDTO> tripsInfo = new ArrayList<>();
         ZoneId enterpriseZone = timezoneService.getEnterpriseTimeZoneByVehicle(vehicleId);
@@ -88,8 +94,8 @@ public class TripService {
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().lower(), enterpriseZone),
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().upper(), enterpriseZone),
                     first.getId(), last.getId(),
-                            "Проверка скорости запроса без геокодера",
-                    //YandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
+                    //        "Проверка скорости запроса без геокодера",
+                    YandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
                     "Проверка скорости запроса без геокодера") //YandexGeocoder.getAddressDescByYandex(last.getPoint().getX(), last.getPoint().getY()))
             );
         }

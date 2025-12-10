@@ -287,11 +287,11 @@ public class RestClient {
                                         })
                                 )
                                 .then(Mono.defer(() -> {
-                                    // Получаем даты первой и последней точки
+                                    // даты первой и последней точки (это для поездки)
                                     String start = (String) finalTrack.getFirst().get("recordedAt");
                                     String end = (String) finalTrack.getLast().get("recordedAt");
 
-                                    // Выполняем дополнительный вызов для сохранения информации о треке
+                                    // тут сохранение инфы о треке
                                     return webClient.post()
                                             .uri(uriBuilder -> uriBuilder.path("api/trips")
                                                     .queryParam("vehicleId", vehicleId)

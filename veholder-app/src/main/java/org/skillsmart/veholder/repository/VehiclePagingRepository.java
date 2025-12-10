@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -43,4 +44,5 @@ public interface VehiclePagingRepository extends PagingAndSortingRepository<Vehi
     Page<VehicleDTO> getVehiclesByEnterprise(Pageable pageable, Long enterpriseId, String manager);
 
     Page<Vehicle> findByEnterpriseId(Long enterpriseId, Pageable pageable);
+
 }

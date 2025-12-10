@@ -11,16 +11,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 @Slf4j
+@Service
 public class YandexGeocoder {
 
     @Cacheable("tripInfo")
-    public static String getAddressDescByYandex(double lon, double lat) throws Exception {
+    public String getAddressDescByYandex(double lon, double lat) throws Exception {
         /*double lat = 55.751244;
         double lon = 37.618423;*/
         log.info("Getting yandex address for ({} - {})", lon, lat);

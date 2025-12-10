@@ -9,13 +9,17 @@ import org.skillsmart.veholder.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.List;
@@ -117,12 +121,34 @@ public class VehicleService {
         return pageRepo.getVehiclesByManagerPaging(pageable, username);
     }
 
-    @Cacheable("vehicles")
+    //@Cacheable("vehicles")
     public Page<VehicleDTO> getPagingVehiclesByEnterprise(Pageable pageable, Long enterpriseId) {
         log.info("getting {} page of vehicles", pageable.getPageNumber());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        String username = "man3";
+        if (authentication != null) {
+            username = authentication.getName();
+        }
         return pageRepo.getVehiclesByEnterprise(pageable, enterpriseId, username);
     }
+
+    /*public Mono<Page<VehicleDTO>> getPagingVehiclesByEnterprise(Pageable pageable, Long enterpriseId) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getName)
+                .flatMap(username -> {
+                    log.info("getting {} page of vehicles for user: {}", pageable.getPageNumber(), username);
+
+                    // Получаем данные страницы
+                    Mono<Page<VehicleDTO>> vehiclesPage = pageRepo
+                            .getVehiclesByEnterprise(pageable, enterpriseId, username);
+
+                    // Если нужен общий счетчик, можно добавить:
+                    //Mono<Long> totalCount = pageRepo.countVehiclesByEnterprise(enterpriseId, username);
+
+                    return vehiclesPage;
+                })
+                .switchIfEmpty(Mono.error(new RuntimeException("User not authenticated")));
+    }*/
 
 }

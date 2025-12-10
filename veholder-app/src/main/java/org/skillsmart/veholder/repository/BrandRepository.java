@@ -10,4 +10,5 @@ import java.util.Collection;
 public interface BrandRepository extends JpaRepository<Brand, Long> {
 
     Page<Brand> findAllByIdIn(Collection<Long> ids, Pageable pageable);
+    Brand findByName(String name);
 }

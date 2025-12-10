@@ -3,11 +3,18 @@ package org.skillsmart.veholder.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Single;
+import reactor.core.publisher.Mono;
+import lombok.extern.slf4j.Slf4j;
 import org.skillsmart.veholder.entity.Enterprise;
+import org.skillsmart.veholder.entity.dto.DashboardData;
 import org.skillsmart.veholder.entity.dto.EnterpriseDto;
+import org.skillsmart.veholder.entity.dto.TripDTO;
 import org.skillsmart.veholder.entity.dto.VehicleDTO;
 import org.skillsmart.veholder.repository.EnterpriseRepository;
-import org.skillsmart.veholder.service.EnterpriseService;
+import org.skillsmart.veholder.service.DashboardService;
+import org.skillsmart.veholder.service.TripService;
 import org.skillsmart.veholder.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,14 +24,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "api/enterprises")
 public class EnterpriseRestController {
@@ -35,6 +45,10 @@ public class EnterpriseRestController {
     private VehicleService vehicleService;
     @Autowired
     private final ObjectMapper objectMapper;
+    @Autowired
+    private DashboardService dashboardService;
+    @Autowired
+    private TripService tripService;
 
     public EnterpriseRestController(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -85,6 +99,44 @@ public class EnterpriseRestController {
         if (enterprises != null) return ResponseEntity.ok(enterprises);
         return ResponseEntity.notFound().build();
     }
+
+    /*@GetMapping(value = "/{id}/vehicles")
+    public Mono<ResponseEntity<Map<String, Object>>> getVehicleFromEnterpriseById(@PathVariable Long id, Pageable pageable) {
+        return vehicleService.getPagingVehiclesByEnterprise(pageable, id)
+                .map(page -> {
+                    Map<String, Object> response = new LinkedHashMap<>();
+                    response.put("currentPage", page.getNumber());
+                    response.put("totalItems", page.getTotalElements());
+                    response.put("totalPages", page.getTotalPages());
+                    response.put("vehicles", page.getContent());
+                    return ResponseEntity.ok(response);
+                })
+                .onErrorResume(e -> {
+                    // Обработка ошибок
+                    return Mono.just(ResponseEntity.internalServerError().build());
+                });
+    }*/
+
+    /*@GetMapping(value = "/{id}/vehicles")
+    public Mono<ResponseEntity<Map<String, Object>>> getVehicleFromEnterpriseById(
+            @PathVariable Long id,
+            Pageable pageable) {
+
+        return Mono.fromCallable(() -> vehicleService.getPagingVehiclesByEnterprise(pageable, id))
+                .subscribeOn(Schedulers.boundedElastic()) // Выполняем в отдельном потоке
+                .map(page -> {
+                    Map<String, Object> response = new LinkedHashMap<>();
+                    response.put("currentPage", page.getNumber());
+                    response.put("totalItems", page.getTotalElements());
+                    response.put("totalPages", page.getTotalPages());
+                    response.put("vehicles", page.getContent());
+                    return ResponseEntity.ok(response);
+                })
+                .onErrorResume(e -> {
+                    log.error("Error getting vehicles for enterprise {}: {}", id, e.getMessage());
+                    return Mono.just(ResponseEntity.internalServerError().build());
+                });
+    }*/
 
     @GetMapping(value = "/{id}/vehicles")
     public ResponseEntity<Map<String, Object>> getVehicleFromEnterpriseById(@PathVariable Long id, Pageable pageable) {
@@ -161,4 +213,42 @@ public class EnterpriseRestController {
         return authentication.getName();
     }
 
+    /*@GetMapping("/{enterpriseId}/dashboard")
+    public Single<ResponseEntity<DashboardData>> getDashboard(@PathVariable Long enterpriseId) {
+        return dashboardService.getEnterpriseDashboard(enterpriseId)
+                .map(ResponseEntity::ok)
+                .doOnSuccess(data -> log.info("Dashboard data loaded for enterprise {}", enterpriseId))
+                .doOnError(error -> log.error("Failed to load dashboard for enterprise {}", enterpriseId, error))
+                .onErrorReturn(error -> {
+                    log.error("Error in dashboard controller for enterprise {}", enterpriseId, error);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(createErrorDashboardData());
+                });
+    }*/
+
+    @GetMapping("/{enterpriseId}/dashboard")
+    public ResponseEntity<DashboardData> getDashboard(@PathVariable Long enterpriseId) {
+        try {
+            DashboardData data = dashboardService.getEnterpriseDashboard(enterpriseId)
+                    .blockingGet(); // Синхронное ожидание результата
+
+            log.info("Dashboard data loaded for enterprise {}", enterpriseId);
+            return ResponseEntity.ok(data);
+
+        } catch (Exception error) {
+            log.error("Failed to load dashboard for enterprise {}", enterpriseId, error);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorDashboardData());
+        }
+    }
+
+    private DashboardData createErrorDashboardData() {
+        return new DashboardData("Error", 0, 0);
+    }
+
+    @GetMapping("/{enterpriseId}/trips")
+    public ResponseEntity<List<TripDTO>> getTripsByEnterprise(@PathVariable Long enterpriseId) {
+        List<TripDTO> response = tripService.getTripsByEnterpriseId(enterpriseId);
+        return ResponseEntity.ok(response);
+    }
 }

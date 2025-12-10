@@ -20,6 +20,7 @@
 	<modules>
 		<module>veholder-app</module>
 		<module>veholder-utils</module>
+		<module>load-test</module>
 	</modules>
 
 	<properties>
@@ -143,6 +144,12 @@
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
 				<version>20250517</version>
+			</dependency>
+			<!-- RxJava 3 -->
+			<dependency>
+				<groupId>io.reactivex.rxjava3</groupId>
+				<artifactId>rxjava</artifactId>
+				<version>3.1.12</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

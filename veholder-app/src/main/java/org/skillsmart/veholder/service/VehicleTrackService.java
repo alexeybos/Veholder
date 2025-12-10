@@ -12,6 +12,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -27,6 +28,7 @@ import org.skillsmart.veholder.utils.GeoJsonFeatureCollection;
 import org.skillsmart.veholder.utils.GeoJsonGeometry;
 import org.skillsmart.veholder.utils.GeoJsonPoint;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
 import static org.skillsmart.veholder.repository.spec.TrackSpecifications.byVehicleId;
 import static org.skillsmart.veholder.repository.spec.TrackSpecifications.timeIntervalIn;
 
+@Slf4j
 @Service
 public class VehicleTrackService {
 
@@ -71,10 +74,14 @@ public class VehicleTrackService {
         }
     }
 
+    //@Cacheable("tracks")
     public List<?> findVehicleTrackInInterval(Long vehicleId, ZonedDateTime start, ZonedDateTime end, String format) {
         Specification<VehicleTrack> spec = Specification.where(byVehicleId(vehicleId))
             .and(timeIntervalIn(start, end));
+        log.debug("Finding track records for vehicleId = {}, starting at {}, ending at {} in {} format",
+                vehicleId, start, end, format);
         List<VehicleTrack> tracks = repo.findAll(spec);
+        log.debug("track records count = {}", tracks.size());
         ZoneId enterpriseZone = timezoneService.getEnterpriseTimeZoneByVehicle(vehicleId);
         if ("geojson".equalsIgnoreCase(format)) {
             List<GeoJsonFeatureCollection> geoJsonWrapper = new ArrayList<>();

@@ -5,13 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Single;
-import reactor.core.publisher.Mono;
 import lombok.extern.slf4j.Slf4j;
 import org.skillsmart.veholder.entity.Enterprise;
-import org.skillsmart.veholder.entity.dto.DashboardData;
-import org.skillsmart.veholder.entity.dto.EnterpriseDto;
-import org.skillsmart.veholder.entity.dto.TripDTO;
-import org.skillsmart.veholder.entity.dto.VehicleDTO;
+import org.skillsmart.veholder.entity.dto.*;
 import org.skillsmart.veholder.repository.EnterpriseRepository;
 import org.skillsmart.veholder.service.DashboardService;
 import org.skillsmart.veholder.service.TripService;
@@ -21,11 +17,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -49,9 +45,12 @@ public class EnterpriseRestController {
     private DashboardService dashboardService;
     @Autowired
     private TripService tripService;
+    @Autowired
+    private final KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic;
 
-    public EnterpriseRestController(ObjectMapper objectMapper) {
+    public EnterpriseRestController(ObjectMapper objectMapper, KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic) {
         this.objectMapper = objectMapper;
+        this.kafkaTemplateStatistic = kafkaTemplateStatistic;
     }
 
     @GetMapping(value = "")
@@ -175,6 +174,8 @@ public class EnterpriseRestController {
             enterprise.setDirectorName(values.getOrDefault("directorName", enterprise.getDirectorName()).toString());
             repo.save(enterprise);
             repo.flush();
+            StatisticEvent statisticEvent = new StatisticEvent("enterprise", "update", LocalDateTime.now());
+            kafkaTemplateStatistic.send("veholder-stats", statisticEvent);
             return ResponseEntity.ok().build();
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(

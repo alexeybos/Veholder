@@ -62,6 +62,18 @@ public class EnterpriseService {
         return repo.checkEnterpriseByManager(id, username) > 0;
     }
 
+    public Long getManagerId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Optional<Manager> manager = managerRepo.findByUsername(username);
+        return manager.orElseThrow().getId();
+    }
+
+    public String getManagerName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
+    }
+
     public Long createEnterprise(Enterprise enterprise) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();

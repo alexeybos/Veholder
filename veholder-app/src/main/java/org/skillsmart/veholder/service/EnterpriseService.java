@@ -46,7 +46,7 @@ public class EnterpriseService {
         }
     }
 
-    @Cacheable("enterprise")
+    //@Cacheable("enterprise")
     public JsonNode getFullEnterpriseInfoById(Long id) {
         try {
             String result = repo.getFullEnterpriseInfoById(id);

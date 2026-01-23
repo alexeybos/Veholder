@@ -13,6 +13,7 @@ import org.skillsmart.veholder.repository.TripRepository;
 import org.skillsmart.veholder.utils.GeoJsonFeatureCollection;
 import org.skillsmart.veholder.utils.YandexGeocoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -80,7 +81,7 @@ public class TripService {
     /**
      * Полная информация по поездкам в интервале
      */
-    //@Cacheable("tripInfo")
+    @Cacheable("tripInfo")
     public List<TripDescriptionDTO> getTripsInfo(Long vehicleId, ZonedDateTime start, ZonedDateTime end) throws Exception {
         log.info("Getting trio info for vehicleId {} ({} - {})", vehicleId, start, end);
         List<Trip> trips = findTripsWithinInterval(vehicleId, start, end);

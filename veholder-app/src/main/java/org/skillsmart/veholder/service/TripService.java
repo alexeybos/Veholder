@@ -82,7 +82,7 @@ public class TripService {
      */
     //@Cacheable("tripInfo")
     public List<TripDescriptionDTO> getTripsInfo(Long vehicleId, ZonedDateTime start, ZonedDateTime end) throws Exception {
-        //log.info("Getting trio info for vehicleId {} ({} - {})", vehicleId, start, end);
+        log.info("Getting trio info for vehicleId {} ({} - {})", vehicleId, start, end);
         List<Trip> trips = findTripsWithinInterval(vehicleId, start, end);
         List<TripDescriptionDTO> tripsInfo = new ArrayList<>();
         ZoneId enterpriseZone = timezoneService.getEnterpriseTimeZoneByVehicle(vehicleId);
@@ -97,8 +97,8 @@ public class TripService {
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().lower(), enterpriseZone),
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().upper(), enterpriseZone),
                     first.getId(), last.getId(),
-                    //        "Проверка скорости запроса без геокодера",
-                    yandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
+                            "Проверка скорости запроса без геокодера",
+                    //yandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
                     "Проверка скорости запроса без геокодера") //YandexGeocoder.getAddressDescByYandex(last.getPoint().getX(), last.getPoint().getY()))
             );
         }

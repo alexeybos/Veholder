@@ -3,6 +3,7 @@ package org.skillsmart.veholder.service;
 import lombok.extern.slf4j.Slf4j;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleProjection;
+import org.skillsmart.veholder.entity.dto.StatisticEvent;
 import org.skillsmart.veholder.entity.dto.VehicleDTO;
 import org.skillsmart.veholder.repository.VehiclePagingRepository;
 import org.skillsmart.veholder.repository.VehicleRepository;
@@ -12,16 +13,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
+import org.skillsmart.veholder.entity.dto.VehicleEvent;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +42,15 @@ public class VehicleService {
     private EnterpriseService enterpriseService;
     @Autowired
     private DriverService driverService;
+    @Autowired
+    private final KafkaTemplate<String, VehicleEvent> kafkaTemplate;
+    @Autowired
+    private final KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic;
+
+    public VehicleService(KafkaTemplate<String, VehicleEvent> kafkaTemplate, KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.kafkaTemplateStatistic = kafkaTemplateStatistic;
+    }
 
     public void save(Vehicle vehicle) {
         repo.save(vehicle);
@@ -74,6 +87,20 @@ public class VehicleService {
         if (!enterpriseService.checkEnterpriseByManager(vehicle.getEnterprise().getId())) {
             throw new AccessDeniedException("Можно добавить автомобиль только в свое предприятие!");
         }
+        // Отправка события в Kafka
+        VehicleEvent event = new VehicleEvent(
+                VehicleEvent.EventType.VEHICLE_CREATED,
+                vehicle.getId(),
+                vehicle.getEnterprise().getId(),
+                enterpriseService.getManagerName(),
+                vehicle.getRegistrationNumber(),
+                LocalDateTime.now(),
+                null
+        );
+
+        kafkaTemplate.send("vehicle-events", event);
+        StatisticEvent statisticEvent = new StatisticEvent("vehicle", "update", LocalDateTime.now());
+        kafkaTemplateStatistic.send("veholder-stats", statisticEvent);
         return repo.save(vehicle).getId();
     }
 
@@ -87,6 +114,8 @@ public class VehicleService {
             throw new AccessDeniedException("Можно редактировать автомобиль только в своем предприятии!");
         }
 
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("color", Map.of("old", vehicle.getColor(), "new", values.getOrDefault("color", vehicle.getColor())));
         //vehicle.getBrand().setId((Long) values.getOrDefault("brandId", vehicle.getBrand().getId()));
         vehicle.getBrand().setId(Long.parseLong(values.getOrDefault("brandId", vehicle.getBrand().getId()).toString()));
         vehicle.setColor((String) values.getOrDefault("color", vehicle.getColor()));
@@ -100,6 +129,22 @@ public class VehicleService {
 
         repo.save(vehicle);
         repo.flush();
+
+
+        VehicleEvent event = new VehicleEvent(
+                VehicleEvent.EventType.VEHICLE_UPDATED,
+                vehicle.getId(),
+                vehicle.getEnterprise().getId(),
+                enterpriseService.getManagerName(),
+                vehicle.getRegistrationNumber(),
+                LocalDateTime.now(),
+                changes
+        );
+
+        kafkaTemplate.send("vehicle-events", event);
+        StatisticEvent statisticEvent = new StatisticEvent("vehicle", "create", LocalDateTime.now());
+        kafkaTemplateStatistic.send("veholder-stats", statisticEvent);
+
     }
 
     public void deleteVehicle(Long id) {
@@ -123,7 +168,7 @@ public class VehicleService {
 
     //@Cacheable("vehicles")
     public Page<VehicleDTO> getPagingVehiclesByEnterprise(Pageable pageable, Long enterpriseId) {
-        log.info("getting {} page of vehicles", pageable.getPageNumber());
+        //log.info("getting {} page of vehicles", pageable.getPageNumber());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = "man3";
         if (authentication != null) {

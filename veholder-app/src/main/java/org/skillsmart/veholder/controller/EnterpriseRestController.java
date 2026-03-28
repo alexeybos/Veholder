@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Single;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.dto.*;
@@ -33,6 +34,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @RestController
 @RequestMapping(value = "api/enterprises")
+@Tag(name = "Предприятия", description = "Работа с предприятиями")
 public class EnterpriseRestController {
 
     @Autowired

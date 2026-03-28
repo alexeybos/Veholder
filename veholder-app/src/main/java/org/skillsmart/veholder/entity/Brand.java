@@ -1,23 +1,36 @@
 package org.skillsmart.veholder.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.reactivestreams.Publisher;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
+@Schema(description = "Сущность пользователя")
 public class Brand {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Уникальный идентификатор бренда", example = "124523", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
+    @Schema(description = "Имя бренда", example = "Москвич")
     private String name;
+
+    @Schema(description = "Тип т/с", example = "легковая")
     private String type;
+
+    @Schema(description = "Грузоподъемность", example = "1500")
     private int loadCapacity;
+
+    @Schema(description = "объем бака", example = "50")
     private int tank;
+
+    @Schema(description = "Количество мест в салоне", example = "5")
     private int numberOfSeats;
 
     public Brand() {

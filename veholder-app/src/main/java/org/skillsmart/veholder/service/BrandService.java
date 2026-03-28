@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
 public class BrandService {
     @Autowired
     BrandRepository repo;
-    @Autowired
-    private final KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic;
+    /*@Autowired
+    private final KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic;*/
 
-    public BrandService(KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic) {
+    /*public BrandService(KafkaTemplate<String, StatisticEvent> kafkaTemplateStatistic) {
         this.kafkaTemplateStatistic = kafkaTemplateStatistic;
-    }
+    }*/
 
 
     @Transactional
@@ -45,7 +45,7 @@ public class BrandService {
             brand.setNumberOfSeats(brandDetails.numberOfSeats());
         }
         StatisticEvent statisticEvent = new StatisticEvent("brand", "update", LocalDateTime.now());
-        kafkaTemplateStatistic.send("veholder-stats", statisticEvent);
+        //kafkaTemplateStatistic.send("veholder-stats", statisticEvent);
         return repo.save(brand);
     }
 }

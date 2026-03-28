@@ -1,0 +1,20 @@
+scrape_configs:
+  # Задача для самого приложения (если актуатор включен)
+  - job_name: 'spring-app-direct'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['172.23.18.35:8080']
+
+  # Задача для OpenTelemetry Collector
+  - job_name: 'otel-collector'
+    metrics_path: '/metrics' # У коллектора путь по умолчанию такой
+    static_configs:
+      - targets: ['otel-collector:8889'] # Используем имя сервиса из docker-compose
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - "alert_rules.yml" # Здесь лежат правила, которые мы обсуждали выше

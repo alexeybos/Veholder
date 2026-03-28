@@ -1,0 +1,18 @@
+{
+	"ulid": "01KKX7ETNBND66C3DE03JT38KK",
+	"minTime": 1773679464270,
+	"maxTime": 1773684000000,
+	"stats": {
+		"numSamples": 14117,
+		"numFloatSamples": 14117,
+		"numSeries": 818,
+		"numChunks": 818
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01KKX7ETNBND66C3DE03JT38KK"
+		]
+	},
+	"version": 1
+}

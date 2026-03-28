@@ -1,0 +1,42 @@
+groups:
+  - name: database_and_api_alerts
+    rules:
+      # 1. Ошибки SQL (на основе логов или исключений репозитория)
+      - alert: DatabaseErrorHighOne
+        expr: sum(rate(spring_data_repository_invocations_seconds_count{status="error"}[5m])) > 0
+        for: 0m
+        annotations:
+          summary: "Проблемы с базой! SQL Errors в {{ $labels.repository }}"
+
+      - alert: DatabaseErrorHigh
+        expr: sum by (repository, exception) (increase(spring_data_repository_invocations_seconds_count{state="ERROR"}[10m])) > 0
+        for: 0m
+        annotations:
+          summary: "Ошибка БД: {{ $labels.exception }}"
+          description: "Репозиторий {{ $labels.repository }} вернул ошибку"
+
+      # 2. Высокая задержка (95-й перцентиль / P95)
+      # Если текущий P95 в 3 раза выше среднего P95 за час
+      - alert: DatabaseLatencyHigh
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(spring_data_repository_invocations_seconds_bucket[5m]))) > 0.01
+        for: 1m
+        annotations:
+          summary: "Высокая задержка! (P95 > порогового)"
+
+      # 3. Высокая частота 4xx и 5xx ошибок
+      #- alert: HighHttpErrors
+      #  expr: |
+      #    sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{http_response_status_code=~"4..|5.."}[5m]))
+      #    /
+      #    ignoring(http_response_status_code)
+      #    group_left sum by (http_route) (rate(http_server_request_duration_seconds_count[5m])) > 0.1
+      #  for: 1m
+      #  annotations:
+      #    summary: "Высокая частота 4xx и 5xx ошибок (>10%) по http_route {{ $labels.http_route }}"
+
+      - alert: InstanceDown
+        expr: up{job="spring-app-direct"} == 0
+        for: 1m
+        annotations:
+          summary: "Сервис {{ $labels.instance }} недоступен!"

@@ -20,8 +20,8 @@ public class VehicleTrack {
     @Column(name = "vehicle_id", nullable = false)
     private Long vehicleId;
 
-    @Column(nullable = false)
     //@Type(org.hibernate.spatial.JTSGeometryType)
+    @Column(nullable = false)
     private Point point;
 
     @Column(name = "recorded_at", nullable = false)

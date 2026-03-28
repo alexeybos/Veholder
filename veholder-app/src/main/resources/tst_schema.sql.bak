@@ -1,0 +1,2 @@
+-- Создаем пользовательский тип для tstzrange в H2
+CREATE DOMAIN IF NOT EXISTS tstzrange AS VARCHAR(255);

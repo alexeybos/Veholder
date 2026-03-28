@@ -1,10 +1,13 @@
 package org.skillsmart.veholder.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.skillsmart.veholder.entity.Brand;
 import org.skillsmart.veholder.entity.Vehicle;
 import org.skillsmart.veholder.entity.VehicleProjection;
 import org.skillsmart.veholder.entity.dto.StatisticEvent;
 import org.skillsmart.veholder.entity.dto.VehicleDTO;
+import org.skillsmart.veholder.repository.BrandRepository;
 import org.skillsmart.veholder.repository.VehiclePagingRepository;
 import org.skillsmart.veholder.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,8 @@ public class VehicleService {
     private EnterpriseService enterpriseService;
     @Autowired
     private DriverService driverService;
+    @Autowired
+    private BrandRepository brandRepository;
     @Autowired
     private final KafkaTemplate<String, VehicleEvent> kafkaTemplate;
     @Autowired
@@ -84,7 +89,7 @@ public class VehicleService {
     }
 
     public Long createVehicle(Vehicle vehicle) {
-        if (!enterpriseService.checkEnterpriseByManager(vehicle.getEnterprise().getId())) {
+        /*if (!enterpriseService.checkEnterpriseByManager(vehicle.getEnterprise().getId())) {
             throw new AccessDeniedException("Можно добавить автомобиль только в свое предприятие!");
         }
         // Отправка события в Kafka
@@ -100,24 +105,34 @@ public class VehicleService {
 
         kafkaTemplate.send("vehicle-events", event);
         StatisticEvent statisticEvent = new StatisticEvent("vehicle", "update", LocalDateTime.now());
-        kafkaTemplateStatistic.send("veholder-stats", statisticEvent);
+        kafkaTemplateStatistic.send("veholder-stats", statisticEvent);*/
         return repo.save(vehicle).getId();
     }
 
     public void updateVehicle(Long id, Map<String, Object> values) {
         Vehicle vehicle = repo.getReferenceById(id);
         Long enterpriseId = vehicle.getEnterprise().getId();
-        if (!enterpriseService.checkEnterpriseByManager(enterpriseId)) {
+        /*if (!enterpriseService.checkEnterpriseByManager(enterpriseId)) {
             throw new AccessDeniedException("Можно редактировать автомобиль только в своем предприятии!");
         }
         if (!enterpriseService.checkEnterpriseByManager(Long.parseLong(values.getOrDefault("enterpriseId", enterpriseId).toString()))) {
             throw new AccessDeniedException("Можно редактировать автомобиль только в своем предприятии!");
-        }
+        }*/
 
         Map<String, Object> changes = new HashMap<>();
         changes.put("color", Map.of("old", vehicle.getColor(), "new", values.getOrDefault("color", vehicle.getColor())));
         //vehicle.getBrand().setId((Long) values.getOrDefault("brandId", vehicle.getBrand().getId()));
-        vehicle.getBrand().setId(Long.parseLong(values.getOrDefault("brandId", vehicle.getBrand().getId()).toString()));
+        //vehicle.getBrand().setId(Long.parseLong(values.getOrDefault("brandId", vehicle.getBrand().getId()).toString()));
+        if (values.containsKey("brandId")) {
+            Long newBrandId = Long.parseLong(values.get("brandId").toString());
+
+            // Загружаем новый Brand из базы
+            Brand newBrand = brandRepository.findById(newBrandId)
+                    .orElseThrow(() -> new EntityNotFoundException("Brand not found with id: " + newBrandId));
+            // Устанавливаем новый Brand
+            vehicle.setBrand(newBrand);
+        }
+
         vehicle.setColor((String) values.getOrDefault("color", vehicle.getColor()));
         vehicle.getEnterprise().setId(Long.parseLong(values.getOrDefault("enterpriseId", vehicle.getEnterprise().getId()).toString()));
         vehicle.setMileage(Integer.parseInt(values.getOrDefault("mileage", vehicle.getMileage()).toString()));
@@ -125,13 +140,13 @@ public class VehicleService {
         vehicle.setPrice(Double.parseDouble(values.getOrDefault("price", vehicle.getPrice()).toString()));
         vehicle.setRegistrationNumber((String) values.getOrDefault("registrationNumber", vehicle.getRegistrationNumber()));
         vehicle.setYearOfProduction(Integer.parseInt(values.getOrDefault("yearOfProduction", vehicle.getYearOfProduction()).toString()));
-        vehicle.setPurchaseDateTime(Instant.parse(values.getOrDefault("purchaseDateTime", vehicle.getPurchaseDateTime()).toString()));
+        //vehicle.setPurchaseDateTime(Instant.parse(values.getOrDefault("purchaseDateTime", vehicle.getPurchaseDateTime()).toString()));
 
         repo.save(vehicle);
         repo.flush();
 
 
-        VehicleEvent event = new VehicleEvent(
+        /*VehicleEvent event = new VehicleEvent(
                 VehicleEvent.EventType.VEHICLE_UPDATED,
                 vehicle.getId(),
                 vehicle.getEnterprise().getId(),
@@ -143,7 +158,7 @@ public class VehicleService {
 
         kafkaTemplate.send("vehicle-events", event);
         StatisticEvent statisticEvent = new StatisticEvent("vehicle", "create", LocalDateTime.now());
-        kafkaTemplateStatistic.send("veholder-stats", statisticEvent);
+        kafkaTemplateStatistic.send("veholder-stats", statisticEvent);*/
 
     }
 

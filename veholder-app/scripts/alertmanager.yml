@@ -1,0 +1,29 @@
+global:
+  resolve_timeout: 5m
+  # Настройки для почты (пример для Gmail)
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alexey.bos@gmail.com'
+  smtp_auth_username: 'alexey.bos@gmail.com'
+  smtp_auth_password: 'celuzgqnfnycumou' # Не обычный пароль, а "Пароль приложения" Google
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s      # Ждем 10 сек, чтобы собрать похожие алерты в одно письмо
+  group_interval: 5m   # Интервал между повторными отправками группы
+  repeat_interval: 3h  # Как часто напоминать, если ошибка не исправлена
+  receiver: 'me-only'
+
+receivers:
+  - name: 'me-only'
+    # Оповещение в Telegram
+    telegram_configs:
+      - bot_token: '8401365187:AAGyU3XSPiX6qP4QmVPT6MCUWr8icN0aDSw'
+        chat_id: 414890670
+        send_resolved: true # Прислать уведомление, когда ошибка исчезнет
+        message: "*Внимание! Ахтунг! Алярм!* \n\n{{ range .Alerts }} *{{ .Labels.alertname }}*\n {{ .Annotations.summary }}\n Начало: {{ .StartsAt.Format \"15:04:05\" }}\n{{ end }}"
+
+    # Оповещение на Почту
+    email_configs:
+      - to: 'alexey.bos@yandex.ru'
+        send_resolved: true

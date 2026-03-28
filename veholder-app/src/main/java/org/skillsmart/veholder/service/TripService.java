@@ -98,8 +98,8 @@ public class TripService {
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().lower(), enterpriseZone),
                     timezoneService.getFormattedDateTimeInEnterpriseZone(trip.getTimeInterval().upper(), enterpriseZone),
                     first.getId(), last.getId(),
-                            "Проверка скорости запроса без геокодера",
-                    //yandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
+                            //"Проверка скорости запроса без геокодера",
+                    yandexGeocoder.getAddressDescByYandex(first.getPoint().getX(), first.getPoint().getY()),
                     "Проверка скорости запроса без геокодера") //YandexGeocoder.getAddressDescByYandex(last.getPoint().getX(), last.getPoint().getY()))
             );
         }

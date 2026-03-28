@@ -1,0 +1,30 @@
+groups:
+  - name: database_and_api_alerts
+    rules:
+      # 1. Ошибки SQL (на основе логов или исключений репозитория)
+      - alert: DatabaseErrorHigh
+        expr: sum(rate(spring_data_repository_invocations_seconds_count{status="error"}[1m])) > 0
+        for: 0m
+        annotations:
+          summary: "Проблемы с базой! SQL Errors в {{ $labels.repository }}"
+
+      # 2. Высокая задержка (95-й перцентиль / P95)
+      # Если текущий P95 в 3 раза выше среднего P95 за час
+      - alert: DatabaseLatencySpike
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(spring_data_repository_invocations_seconds_bucket[1m])))
+          > 
+          3 * avg_over_time(histogram_quantile(0.95, sum by (le) (rate(spring_data_repository_invocations_seconds_bucket[1m])))[1h:1m])
+        for: 2m
+        annotations:
+          summary: "Высокая задержка! (P95 > 3x среднего за час)"
+
+      # 3. Высокая частота 4xx и 5xx ошибок
+      - alert: HighHttpErrors
+        expr: |
+          sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{http_response_status_code=~"4..|5.."}[1m])) 
+          / 
+          sum by (http_route) (rate(http_server_request_duration_seconds_count[1m])) > 0.1
+        for: 1m
+        annotations:
+          summary: "Высокая частота ошибок (>10%) по http_route {{ $labels.http_route }}"

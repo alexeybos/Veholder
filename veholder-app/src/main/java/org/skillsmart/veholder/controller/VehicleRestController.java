@@ -1,5 +1,7 @@
 package org.skillsmart.veholder.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.skillsmart.veholder.entity.Brand;
 import org.skillsmart.veholder.entity.Enterprise;
 import org.skillsmart.veholder.entity.Vehicle;
@@ -22,18 +24,17 @@ import java.util.*;
 
 @RestController
 @RequestMapping("api/vehicles")
+@Tag(name = "Автомобили", description = "Работа с автомобилями")
 public class VehicleRestController {
 
     @Autowired
     private VehicleService service;
 
-    @GetMapping(value = "vehiclesFull")
-    public ResponseEntity<List<Vehicle>> getVehicles() {
-        Sort sortBy = Sort.by("id").ascending();
-        return new ResponseEntity<>(service.getList(sortBy), HttpStatus.OK);
-    }
-
     @GetMapping(value = "")
+    @Operation(
+            summary = "Получить список всех автомобилей",
+            description = "Получить список всех автомобилей (с разбивкой по страницам)"
+    )
     public ResponseEntity<Map<String, Object>> getVehiclesPages(Pageable pageable) {
         Page<VehicleProjection> page = service.getPagingVehicles(pageable);
 
@@ -46,11 +47,29 @@ public class VehicleRestController {
     }
 
     @GetMapping(value = "/{id}")
+    @Operation(
+            summary = "Информация по автомобилю",
+            description = "Получить описание конкретного автомобиля"
+    )
     public ResponseEntity<VehicleProjection> getVehicle(@PathVariable Long id) {
         return new ResponseEntity<>(service.getVehicleProjectedById(id), HttpStatus.OK);
     }
 
+    @GetMapping(value = "vehiclesFull")
+    @Operation(
+            summary = "Расширенная информация по автомобилю",
+            description = "Получить полную информацию по автомобилю"
+    )
+    public ResponseEntity<List<Vehicle>> getVehicles() {
+        Sort sortBy = Sort.by("id").ascending();
+        return new ResponseEntity<>(service.getList(sortBy), HttpStatus.OK);
+    }
+
     @PostMapping(value = "")
+    @Operation(
+            summary = "Создать автомобиль",
+            description = "создание нового автомобиля"
+    )
     public ResponseEntity<?> createVehicle(@RequestBody VehicleDTO vehicle) {
         Vehicle vehicleFullObject = new Vehicle();
         vehicleFullObject.setBrand(new Brand(vehicle.getBrandId()));
@@ -73,6 +92,10 @@ public class VehicleRestController {
         }
     }
 
+    @Operation(
+            summary = "Редактировать автомобиль",
+            description = "Редактирование характеристик автомобиля"
+    )
     @PutMapping(value = "/{id}")
     public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Map<String, Object> vehicle) {
         if (!Objects.equals(id, vehicle.getOrDefault("id", id))) {
@@ -95,6 +118,10 @@ public class VehicleRestController {
 
     }
 
+    @Operation(
+            summary = "Удалить автомобиль",
+            description = "Удаление указанного автомобиля"
+    )
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
         try {

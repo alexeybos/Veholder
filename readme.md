@@ -1,8 +1,23 @@
 # Veholder
+[![Java](https://img.shields.io/badge/Java-21+-green.svg)](https://www.java.com/)
+[![SpringBoot](https://img.shields.io/badge/Spring%20Boot-3.4.3-blue.svg)](https://spring.io/)
+[![Posgresql](https://img.shields.io/badge/PostgreSQL-12.22-blue.svg)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-orange.svg)](https://www.docker.com/)
+[![Kafka](https://img.shields.io/badge/Apache-Kafka-black.svg)](https://kafka.apache.org/)
+[![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-red.svg)](https://prometheus.io/)
+[![Grafana](https://img.shields.io/badge/Grafana-Visualization-orange.svg)](https://grafana.com/)
 ***
 Система управления автопарком в предприятиях.
 Позволяет управлять списком предприятий, менеджеров и машин, отслеживать перемещение транспорта и получать аналитические отчеты.
 Проект построен на базе классической многослойной (трехуровневой) архитектуры и рассчитан на обработку больших объемов данных о перемещениях автомобилей.
+
+## Содержание
+- [Основные возможности](#-возможности)
+- [Технологический стек](#-технологический-стек)
+- [Архитектура](#-архитектура)
+- [Скриншоты](#-скриншоты)
+- [Deployment](#-deployment)
+- [Docker](#-docker)
 
 ## Основные возможности
 - Управление предприятиями, автомобилями и водителями.

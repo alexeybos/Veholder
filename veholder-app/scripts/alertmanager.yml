@@ -18,7 +18,7 @@ receivers:
   - name: 'me-only'
     # Оповещение в Telegram
     telegram_configs:
-      - bot_token: '8401365187:AAGyU3XSPiX6qP4QmVPT6MCUWr8icN0aDSw'
+      - bot_token: 'token'
         chat_id: 414890670
         send_resolved: true # Прислать уведомление, когда ошибка исчезнет
         message: "*Внимание! Ахтунг! Алярм!* \n\n{{ range .Alerts }} *{{ .Labels.alertname }}*\n {{ .Annotations.summary }}\n Начало: {{ .StartsAt.Format \"15:04:05\" }}\n{{ end }}"

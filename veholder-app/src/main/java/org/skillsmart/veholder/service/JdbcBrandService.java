@@ -17,12 +17,12 @@ public class JdbcBrandService {
 
     @Transactional
     public void createBrandWithJdbc(BrandDto brandDto) {
+        if (brandDto.name() == null) {
+            throw new InvalidParameterException("Name cannot be null");
+        }
         jdbcTemplate.update(
                 "INSERT INTO brand (name, type, load_capacity, tank, number_of_seats) VALUES (?, ?, ?, ?, ?)",
                 brandDto.name(), brandDto.type(), brandDto.loadCapacity(), brandDto.tank(), brandDto.numberOfSeats()
         );
-        if (brandDto.name() == null) {
-            throw new InvalidParameterException("Name cannot be null");
-        }
     }
 }

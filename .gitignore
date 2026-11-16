@@ -3,6 +3,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+veholder-app/.cifuzz-corpus/
+graphify-out/
 
 ### STS ###
 .apt_generated
